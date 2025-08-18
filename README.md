@@ -18,3 +18,7 @@ Apache-2.0 License – free to use, modify, and distribute with proper attributi
 
 ## Acknowledgments
 Developed by **Balaur Ionuț Doru / AI3DCNC**, with assistance from **ChatGPT (OpenAI)**.
+
+
+## Docs
+- [Defensive Publication](docs/defensive-publication.md)
