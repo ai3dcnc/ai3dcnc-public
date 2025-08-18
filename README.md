@@ -15,3 +15,6 @@ This repository contains **parsers, builders, and documentation** for the AI3DCN
 
 ## License
 Apache-2.0 License – free to use, modify, and distribute with proper attribution.
+
+## Acknowledgments
+Developed by **Balaur Ionuț Doru / AI3DCNC**, with assistance from **ChatGPT (OpenAI)**.
