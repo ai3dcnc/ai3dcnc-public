@@ -1,4 +1,3 @@
-```python
 # tools/gen_all.py
 # Concatenate parsers/ and builders/ into parsers_all.py and builders_all.py
 # AUTO-GENERATED SCRIPT
