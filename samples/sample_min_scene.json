@@ -1,0 +1,9 @@
+{
+  "meta": {"generator":"AI3DCNC","version":"0.1"},
+  "materials": {"materials":[{"name":"Mat_Default","pbr":{"base_color":[0.8,0.8,0.8,1.0],"metallic":0.0,"roughness":0.5,"specular":0.5,"ior":1.45,"alpha":1.0,"textures":{}}}]},
+  "mesh": {"meshes":[{"name":"Cube","object_name":"Cube","vertices":[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]],"triangles":[[0,1,2],[0,2,3]],"materials":["Mat_Default"]}]},
+  "collections": {"collections":[{"name":"Collection","objects":["Cube"]}]},
+  "scene_view": {"cameras":[],"lights":[]},
+  "geometry_nodes": {"groups":[],"overrides":[]},
+  "bool_ops": {"targets":[]}
+}
