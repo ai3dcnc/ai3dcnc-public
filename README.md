@@ -22,3 +22,10 @@ Developed by **Balaur Ionuț Doru / AI3DCNC**, with assistance from **ChatGPT (O
 
 ## Docs
 - [Defensive Publication](docs/defensive-publication.md)
+
+Generated artifacts: parsers_all.py, builders_all.py (run: python tools/gen_all.py). Do not edit.
+ vb How to regenerate:
+python tools/gen_all.py
+
+[![Release](https://img.shields.io/github/v/release/ai3dcnc/ai3dcnc-public?sort=semver)](https://github.com/ai3dcnc/ai3dcnc-public/releases)
+
