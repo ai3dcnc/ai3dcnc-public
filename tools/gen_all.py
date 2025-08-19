@@ -1,47 +1,47 @@
-# tools/gen\_all.py
-
-# Concatenate parsers/ and builders/ into parsers\_all.py and builders\_all.py
-
+```python
+# tools/gen_all.py
+# Concatenate parsers/ and builders/ into parsers_all.py and builders_all.py
 # AUTO-GENERATED SCRIPT
 
 import os
 import datetime
 
-PARSERS = \[
-"parsers/parser\_mesh.py",
-"parsers/parser\_scene.py",
-"parsers/parser\_materials.py",
-"parsers/parser\_collections.py",
-"parsers/parser\_boolops.py",
-"parsers/parser\_gn.py",
-"parsers/parser\_scene\_view\.py",
+PARSERS = [
+    "parsers/parser_mesh.py",
+    "parsers/parser_scene.py",
+    "parsers/parser_materials.py",
+    "parsers/parser_collections.py",
+    "parsers/parser_boolops.py",
+    "parsers/parser_gn.py",
+    "parsers/parser_scene_view.py",
 ]
 
-BUILDERS = \[
-"builders/builder\_mesh.py",
-"builders/builder\_scene\_import.py",
-"builders/builder\_scene\_view\.py",
-"builders/builder\_materials.py",
-"builders/builder\_collections.py",
-"builders/builder\_gn\_overrides.py",
-"builders/builder\_boolops.py",
+BUILDERS = [
+    "builders/builder_mesh.py",
+    "builders/builder_scene_import.py",
+    "builders/builder_scene_view.py",
+    "builders/builder_materials.py",
+    "builders/builder_collections.py",
+    "builders/builder_gn_overrides.py",
+    "builders/builder_boolops.py",
 ]
 
 HEADER = "# AUTO-GENERATED. DO NOT EDIT.\n# UTC: {}\n"
 
-def concat(files, out\_file):
-with open(out\_file, "w", encoding="utf-8") as out:
-out.write(HEADER.format(datetime.datetime.utcnow().isoformat()))
-for f in files:
-if os.path.exists(f):
-out.write(f"\n# ===== file: {f} =====\n")
-with open(f, "r", encoding="utf-8") as src:
-out.write(src.read())
-out.write(f"\n# ===== end {f} =====\n")
-else:
-out.write(f"\n# \[WARNING] Missing file: {f}\n")
+def concat(files, out_file):
+    with open(out_file, "w", encoding="utf-8") as out:
+        out.write(HEADER.format(datetime.datetime.utcnow().isoformat()))
+        for f in files:
+            if os.path.exists(f):
+                out.write(f"\n# ===== file: {f} =====\n")
+                with open(f, "r", encoding="utf-8") as src:
+                    out.write(src.read())
+                out.write(f"\n# ===== end {f} =====\n")
+            else:
+                out.write(f"\n# [WARNING] Missing file: {f}\n")
 
-if **name** == "**main**":
-concat(PARSERS, "parsers\_all.py")
-concat(BUILDERS, "builders\_all.py")
-print("\[SUMMARY] parsers\_all.py and builders\_all.py generated.")
+if __name__ == "__main__":
+    concat(PARSERS, "parsers_all.py")
+    concat(BUILDERS, "builders_all.py")
+    print("[SUMMARY] parsers_all.py and builders_all.py generated.")
+```
