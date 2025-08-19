@@ -4,6 +4,7 @@
 
 # AUTO-GENERATED SCRIPT
 
+import os
 import datetime
 
 PARSERS = \[
@@ -32,10 +33,13 @@ def concat(files, out\_file):
 with open(out\_file, "w", encoding="utf-8") as out:
 out.write(HEADER.format(datetime.datetime.utcnow().isoformat()))
 for f in files:
+if os.path.exists(f):
 out.write(f"\n# ===== file: {f} =====\n")
 with open(f, "r", encoding="utf-8") as src:
 out.write(src.read())
 out.write(f"\n# ===== end {f} =====\n")
+else:
+out.write(f"\n# \[WARNING] Missing file: {f}\n")
 
 if **name** == "**main**":
 concat(PARSERS, "parsers\_all.py")
