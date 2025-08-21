@@ -29,3 +29,8 @@ python tools/gen_all.py
 
 [![Release](https://img.shields.io/github/v/release/ai3dcnc/ai3dcnc-public?sort=semver)](https://github.com/ai3dcnc/ai3dcnc-public/releases)
 
+
+## Context and Inspiration
+For details about the relationship between KEROS and NodeKit, see [BACKGROUND.md](./BACKGROUND.md).
+
+.
