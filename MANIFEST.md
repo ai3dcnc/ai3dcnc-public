@@ -1,6 +1,4 @@
-{
-  "version": 2,
-  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/v0.1.1/",
+{  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/stable/",
   "groups": [
     {
       "name": "parsers",
