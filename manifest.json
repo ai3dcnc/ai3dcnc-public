@@ -1,4 +1,4 @@
-{  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/stable/",
+{  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/main/",
   "groups": [
     {
       "name": "parsers",
