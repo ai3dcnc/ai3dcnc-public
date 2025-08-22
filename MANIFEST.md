@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/main/",
-  "entrypoints": [
+  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/v0.1.1/",
+  "entrypoints": [ 
     {"name": "parser_mesh", "path": "parsers/parser_mesh.py"},
     {"name": "parser_scene", "path": "parsers/parser_scene.py"},
     {"name": "parser_materials", "path": "parsers/parser_materials.py"},
@@ -21,5 +21,6 @@
   "aliases": {
     "parsers_all": "parsers_all.py",
     "builders_all": "builders_all.py"
+  }
   }
 }
