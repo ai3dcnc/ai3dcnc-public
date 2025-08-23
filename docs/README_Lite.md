@@ -85,3 +85,5 @@ You can change both in the panel. Use **Open Export Dir** / **Open Import Dir** 
 ## Acknowledgements
 
 * Built as part of the AI3DCNC public‑lite toolchain.
+
+[sample JSON](../samples/min_scene_export.json)
