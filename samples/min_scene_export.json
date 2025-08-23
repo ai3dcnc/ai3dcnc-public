@@ -1,0 +1,104 @@
+{
+  "scene_view": {
+    "cameras": [
+      {
+        "name": "Cam",
+        "transform": {}
+      }
+    ],
+    "lights": [
+      {
+        "name": "Key",
+        "type": "AREA",
+        "energy": 800.0,
+        "transform": {}
+      }
+    ],
+    "meta": {
+      "units": "m"
+    }
+  },
+  "materials": {
+    "materials": [
+      {
+        "name": "Mat_A"
+      },
+      {
+        "name": "Mat_B"
+      }
+    ],
+    "meta": {
+      "units": "m"
+    }
+  },
+  "mesh": {
+    "meshes": [
+      {
+        "object_name": "Cube",
+        "collection_path": [
+          "Root"
+        ],
+        "transform": {},
+        "world_matrix": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "dimensions": {
+          "local": [],
+          "world": []
+        },
+        "vertices": [],
+        "materials": [
+          "Mat_A"
+        ],
+        "triangles": []
+      }
+    ],
+    "meta": {
+      "units": "m"
+    }
+  },
+  "collections": {
+    "collections": [
+      {
+        "name": "Root",
+        "path": [
+          "Root"
+        ],
+        "children": [],
+        "items": {},
+        "flags": {}
+      }
+    ],
+    "meta": {
+      "units": "m"
+    }
+  },
+  "geometry_nodes": {
+    "groups": [],
+    "overrides": [],
+    "meta": {
+      "units": "m"
+    }
+  },
+  "bool_ops": {
+    "targets": [],
+    "meta": {
+      "units": "m"
+    }
+  }
+}
