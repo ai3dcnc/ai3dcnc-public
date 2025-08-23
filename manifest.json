@@ -1,5 +1,11 @@
 {
-  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/v0.1.1/",
-  "entrypoints": ["parsers_all.py","builders_all.py"],
-  "aliases": {"parsers_all":"parsers_all.py","builders_all":"builders_all.py"}
+  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/main/",
+  "entrypoints": [
+    "parsers_all.py",
+    "builders_all.py"
+  ],
+  "aliases": {
+    "parsers_all": "parsers_all.py",
+    "builders_all": "builders_all.py"
+  }
 }
