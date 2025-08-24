@@ -1,5 +1,4 @@
 {
-  "version": 1,
   "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/main/",
   "entrypoints": [
     "parsers_all.py",
@@ -10,26 +9,5 @@
     "parsers_all": "parsers_all.py",
     "builders_all": "builders_all.py",
     "roadmap": "docs/ROADMAP_KNOWLEDGE.json"
-  },
-
-  "validate": {
-    "required_keys": ["raw_base", "entrypoints", "aliases"],
-    "entrypoints_ext": [".py", ".json"],
-    "max_entrypoints": 20
-  },
-
-  "cache": { "ttl_hours": 24, "dedupe_by_sha1": true },
-  "pin":   { "tag": "main" },
-
-  "retries": { "network": 2, "delay_ms": 500 },
-  "security": { "local_first": true, "reject_outside_raw_base": true },
-
-  "integrity": {
-    "enforce": false,
-    "files": {
-      "parsers_all.py": { "sha1": null },
-      "builders_all.py": { "sha1": null },
-      "docs/ROADMAP_KNOWLEDGE.json": { "sha1": null }
-    }
   }
 }
