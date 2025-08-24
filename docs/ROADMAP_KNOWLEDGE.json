@@ -1,54 +1,77 @@
 {
   "ts": "2025-08-24T00:00:00Z",
   "profile": "roadmap knowledge for AI_TOOLS",
-  "units": {
-    "internal": "m",
-    "cam": "mm",
-    "ui_decimals": 3
+
+  "units": { "internal": "m", "cam": "mm", "ui_decimals": 3 },
+
+  "manifest_hint": {
+    "entrypoints": ["parsers_all.py","builders_all.py","docs/ROADMAP_KNOWLEDGE.json"],
+    "note": "Loaded automatically at manifest."
   },
-  "canturi_materiale_viewmode_blender42": {
-    "panouri_pal": {
-      "thickness": 18,
-      "axes": {"x": "width", "y": "depth", "z": "thickness"},
-      "edges": [0, 0.8, 1, 2],
-      "toggle_show_band": true
-    },
-    "view_mode": {
-      "bevel": {"angle": 30, "width": [0.5, 0.8], "segments": [1, 2]},
-      "normals": ["harden", "weighted"],
-      "auto_smooth_angle": 30,
-      "viewport": "cavity_highlight"
-    },
-    "cnc": {
-      "markers_from_finished_edges": true,
-      "switch": "from_finished_edges"
-    },
-    "qc_tpa": {"fund_green": true, "rest_purple": true},
-    "export": ["CSV", "TXT", "DXF_optional", "TCN_future"],
-    "next": ["script BOM cant", "mapping feronerie GN"]
-  },
+
   "keros_context": {
     "blender_versions": ["4.2", "3.6 LTS"],
     "gn_plate": "parametric PAL with X/Y/Z and override thickness",
-    "markers": ["DRILL", "SLOT", "COUNTERSINK", "EDGE_DRILL"],
-    "coords": "referenced from finished edges"
+    "coords_ref": "finished edges by default; switch=from_finished_edges"
   },
+
   "materials_logic": {
     "policy": "semi-strict",
-    "rule": "material code → thickness standard",
-    "override": "manual allowed, flagged if != standard"
+    "rule": "material code → standard thickness (e.g., H1137 → 18 mm)",
+    "override": "manual allowed, visually flagged if != standard"
   },
-  "automations_soft_robots": {
-    "google_sheets": "present but inactive",
-    "notify": "present but inactive",
-    "activation": "after builders + CNC exporters"
+
+  "canturi_materiale_viewmode_blender42": {
+    "panouri_pal": { "thickness": 18, "axes": { "x":"width","y":"depth","z":"thickness" } },
+    "edges_mm": [0, 0.8, 1, 2],
+    "toggle_show_band": true,
+    "material_edge_band": "EDGE_BAND",
+    "view_mode": {
+      "bevel": { "angle_deg": 30, "width_mm": [0.5, 0.8], "segments": [1, 2] },
+      "normals": ["Harden", "Weighted"], "auto_smooth_deg": 30, "viewport_hint": "Cavity"
+    }
   },
-  "preferences": {
-    "units": "m (3 decimals)",
-    "export": "mm",
-    "lang_code": "English for code/comments, Romanian for chat"
+
+  "cnc_markers": {
+    "types": ["DRILL","SLOT","EDGE_DRILL","COUNTERSINK"],
+    "geometry": "empties or points; parsable",
+    "reference": "finished edges; switch via from_finished_edges"
   },
-  "next_steps": {
-    "gn_plate": "simple GN for PAL board with edges + thickness control"
+
+  "exporters": {
+    "csv_txt": "canonical",
+    "dxf": "optional (CUT_OUTER/DRILL/SLOT layers)",
+    "tcn": "minimal TPA dialect for Vitap K2 (probe)"
+  },
+
+  "qc_visual": { "hole_bottom_color": "green", "rest_color": "purple" },
+
+  "preferences": { "lang_code": "EN code / RO chat" },
+
+  "progress_public_lite": {
+    "repo_map_doc": "done",
+    "roadmap_knowledge_doc": "done",
+    "manifest_entrypoints": "updated",
+    "addon_lite": "present",
+    "sample_min_scene_export": "present",
+    "readme_banner_units": "tbd",
+    "defensive_tpa_schema_example": "tbd"
+  },
+
+  "roadmap_e2e_lite": [
+    "Freeze spec: lock INTRODUCTION + manifest; units m→mm at export",
+    "GN PAL board Lite: X/Y/Z, thickness from material code + override flagged; F/B/L/R edge bands with proper UV",
+    "Markers + schema: DRILL/SLOT/EDGE_DRILL/COUNTERSINK; schemas/tpa_v1.schema.json (mm) + example",
+    "CNC exporters Lite: CSV/TXT canonical; DXF optional; minimal .tcn for Vitap K2",
+    "E2E demo public: run parsers on min scene; capture [SUMMARY] → docs/TEST_E2E.md",
+    "Machine probes: Vitap K2 import .tcn; Homag cutter circular sample",
+    "Tag pre-release v0.1-lite + CITATION.cff",
+    "Zenodo DOI + README badge (after steps 5–6 pass)"
+  ],
+
+  "gates": {
+    "doi_after_e2e": true,
+    "repeatability_hashes": 2,
+    "k2_import_ok": true
   }
 }
