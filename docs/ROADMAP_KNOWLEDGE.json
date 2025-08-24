@@ -1,65 +1,207 @@
 {
   "ts": "2025-08-24T00:00:00Z",
-  "profile": "roadmap knowledge for AI_TOOLS (public-lite)",
+  "version": "1.1",
+  "strict": true,
+  "profile": "AI_TOOLS public-lite roadmap knowledge (explicit, zero-ambiguity)",
   "doc_ref": "docs/ROADMAP_EXEC.md",
 
-  "units": { "internal": "m", "cam": "mm", "ui_decimals": 3 },
+  "repo": {
+    "slug": "ai3dcnc/ai3dcnc-public",
+    "branch": "main",
+    "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/main/",
+    "raw_manifest_url": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/main/manifest.json"
+  },
 
   "manifest_hint": {
     "entrypoints": ["parsers_all.py", "builders_all.py", "docs/ROADMAP_KNOWLEDGE.json"],
-    "note": "Loaded automatically at manifest."
+    "aliases": {
+      "parsers_all": "parsers_all.py",
+      "builders_all": "builders_all.py",
+      "roadmap": "docs/ROADMAP_KNOWLEDGE.json"
+    },
+    "required_keys": ["raw_base", "entrypoints", "aliases"],
+    "note": "Roadmap is sourced from this file via manifest. INTRODUCTION remains the sole technical spec." 
   },
 
-  "keros_context": {
-    "blender_versions": ["4.2", "3.6 LTS"],
-    "gn_plate": "parametric PAL with X/Y/Z and override thickness",
-    "coords_ref": "finished edges by default; switch=from_finished_edges"
+  "units": {
+    "internal": "m",
+    "cam": "mm",
+    "ui_decimals": 3,
+    "conversion": "mm = round(m * 1000.0, 3)",
+    "rounding": { "at_export_only": true, "precision_mm_allowed": [1, 0] }
   },
+
+  "axes": { "x": "width", "y": "depth", "z": "thickness", "origin": "Front-Left-Bottom of core" },
+  "references": { "from_finished_edges": true, "switch": "from_finished_edges" },
 
   "materials_logic": {
     "policy": "semi-strict",
-    "rule": "material code → standard thickness (e.g., H1137 → 18 mm)",
-    "override": "manual allowed, visually flagged if != standard"
+    "rule": "material code → standard thickness; override allowed and flagged",
+    "mapping_examples": [
+      {"code": "H1137", "thickness_mm": 18},
+      {"code": "U999",  "thickness_mm": 18}
+    ],
+    "override": {"allowed": true, "flag_attribute": "is_override", "flag_value": 1}
   },
 
-  "canturi_materiale_viewmode_blender42": {
-    "panouri_pal": { "thickness_mm": 18, "axes": { "x": "width", "y": "depth", "z": "thickness" } },
-    "edges_mm": [0, 0.8, 1, 2],
-    "material_edge_band": "EDGE_BAND",
-    "toggle_show_band": true,
+  "gn_pal_board_lite": {
+    "group_name": "GN_PAL_Board_Lite",
+    "inputs": [
+      {"name": "X_m", "type": "float", "min": 0.001},
+      {"name": "Y_m", "type": "float", "min": 0.001},
+      {"name": "Z_m", "type": "float", "min": 0.001, "note": "thickness; default resolved from MaterialCode"},
+      {"name": "MaterialCode", "type": "string"},
+      {"name": "ThicknessOverride_mm", "type": "float", "optional": true},
+      {"name": "Show_Band", "type": "bool", "default": true}
+    ],
+    "outputs": [
+      {"name": "Board", "type": "mesh"},
+      {"name": "EdgeBands", "type": "mesh", "material": "EDGE_BAND"}
+    ],
+    "edge_bands": {
+      "sides": ["F", "B", "L", "R"],
+      "width_mm_allowed": [0, 0.8, 1, 2],
+      "as_separate_geometry": true,
+      "material": "EDGE_BAND",
+      "uv": "planar along band length; consistent scale"
+    },
     "view_mode": {
-      "bevel": { "angle_deg": 30, "width_mm": [0.5, 0.8], "segments": [1, 2] },
+      "bevel": {"limit_angle_deg": 30, "width_mm_range": [0.5, 0.8], "segments_range": [1, 2]},
       "normals": ["Harden", "Weighted"],
       "auto_smooth_deg": 30,
       "viewport_hint": "Cavity"
-    }
+    },
+    "acceptance": [
+      "Dimensions in meters (3 decimals)",
+      "ThicknessOverride_mm ≠ standard ⇒ attribute is_override=1",
+      "Show_Band toggles EdgeBands on/off",
+      "EDGE_BAND material present on bands"
+    ]
   },
 
   "cnc_markers": {
     "types": ["DRILL", "SLOT", "EDGE_DRILL", "COUNTERSINK"],
-    "geometry": "empties or points; parsable",
-    "reference": "finished edges; switch via from_finished_edges"
+    "props_m_required": ["type","side","x_m","y_m","depth_m"],
+    "props_m_optional": ["z_m","d_m","w_m","angle_deg","ref"],
+    "side_enum": ["F","B","L","R","T","D"],
+    "reference": "finished edges by default; switch via from_finished_edges",
+    "constraints": [
+      "0 <= depth_m <= Z_m",
+      "d_m > 0 for DRILL/COUNTERSINK",
+      "w_m > 0 for SLOT"
+    ],
+    "example_pre_cam_m": {
+      "ops": [
+        {"type":"DRILL","side":"F","x_m":0.120,"y_m":0.250,"z_m":0.000,"d_m":0.005,"depth_m":0.018,"ref":"finished"},
+        {"type":"SLOT","side":"B","x_m":0.050,"y_m":0.400,"z_m":0.009,"w_m":0.006,"depth_m":0.010,"angle_deg":0}
+      ]
+    }
   },
 
   "schemas": {
     "mesh_v1": "schemas/mesh_v1.schema.json",
-    "tpa_v1": "schemas/tpa_v1.schema.json"
+    "tpa_v1": "schemas/tpa_v1.schema.json",
+    "tpa_example": "samples/tpa_example_v1.json",
+    "tpa_v1_schema_inline_mm": {
+      "$id": "tpa_v1.schema.json",
+      "type": "object",
+      "required": ["ops_mm"],
+      "properties": {
+        "ops_mm": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type","side","x_mm","y_mm","depth_mm"],
+            "properties": {
+              "type": {"enum": ["DRILL","SLOT","EDGE_DRILL","COUNTERSINK"]},
+              "side": {"enum": ["F","B","L","R","T","D"]},
+              "x_mm": {"type": "number"},
+              "y_mm": {"type": "number"},
+              "z_mm": {"type": "number"},
+              "d_mm": {"type": "number"},
+              "w_mm": {"type": "number"},
+              "depth_mm": {"type": "number"},
+              "angle_deg": {"type": "number"},
+              "ref": {"enum": ["finished","core"]}
+            }
+          }
+        }
+      }
+    }
   },
 
   "exporters": {
-    "csv_txt": "canonical",
-    "dxf": "optional (CUT_OUTER/DRILL/SLOT layers)",
-    "tcn": "minimal TPA dialect for Vitap K2 (probe)"
+    "conversion_m_to_mm": "mm = round(m * 1000.0, 3)",
+    "csv": {
+      "header": ["job_id","panel_id","type","side","x_mm","y_mm","z_mm","d_mm","w_mm","depth_mm","angle_deg","ref","notes"],
+      "example_row": "job01,P001,DRILL,F,120.000,250.000,0.000,5.000,,18.000,0,finished,probe"
+    },
+    "tcn_min_vitap_k2": {
+      "format": "ini_like",
+      "lines": [
+        "[HEADER]",
+        "MACHINE=VITAP_K2",
+        "UNITS=MM",
+        "",
+        "[DRILL]",
+        "SIDE=F",
+        "X=120.000",
+        "Y=250.000",
+        "D=5.000",
+        "DEPTH=18.000",
+        "REF=FINISHED"
+      ],
+      "slot_extras": ["W=6.000","ANGLE=0"]
+    },
+    "dxf_qa": {"units": "m", "layers": ["CUT_OUTER","DRILL","SLOT"]}
   },
 
-  "samples": {
-    "min_scene_export": "samples/min_scene_export.json",
-    "tpa_example": "samples/tpa_example_v1.json"
+  "e2e_demo": {
+    "steps": [
+      "Run parsers on minimal scene",
+      "Generate samples/min_scene_export.json (m)",
+      "Export exports/ops.csv and exports/ops.tcn (mm)",
+      "Optionally write qa/min_panel.dxf",
+      "Document steps and [SUMMARY] lines in docs/TEST_E2E.md"
+    ],
+    "expected_summary": [
+      "[SUMMARY] mesh: meshes=1",
+      "[SUMMARY] export_csv: rows=5 file=exports/ops.csv",
+      "[SUMMARY] export_tcn: ops=5 file=exports/ops.tcn"
+    ]
   },
 
-  "qc_visual": { "hole_bottom_color": "green", "rest_color": "purple" },
+  "machine_probes": {
+    "vitap_k2": ["Import .tcn", "Verify positions", "Verify diameters", "Verify depths"],
+    "homag": ["Cutter circular sample from CSV", "Note compatibility"]
+  },
 
-  "preferences": { "lang_code": "EN code / RO chat" },
+  "release": {
+    "when": "after E2E + machine probes pass",
+    "steps": ["tag v0.1-lite", "add CITATION.cff", "Zenodo DOI + README badge"]
+  },
+
+  "progress_public_lite": {
+    "repo_map_doc": "done",
+    "roadmap_knowledge_doc": "done",
+    "manifest_entrypoints": "updated",
+    "addon_lite": "present",
+    "sample_min_scene_export": "present",
+    "readme_banner_units": "tbd",
+    "defensive_tpa_schema_example": "tbd"
+  },
+
+  "gates": { "doi_after_e2e": true, "repeatability_hashes": 2, "k2_import_ok": true, "readme_banner_units": true },
+
+  "qa_checklist": [
+    "Units design=m, export=mm",
+    "Edge bands material = EDGE_BAND",
+    "Normals hardened + weighted; AutoSmooth ≈ 30°",
+    "Markers reference from finished edges",
+    "CSV header exactly as specified",
+    "TCN UNITS=MM present",
+    "DXF layers named correctly"
+  ],
 
   "roadmap_e2e_lite": [
     "Freeze spec: lock INTRODUCTION + manifest; units m→mm at export",
@@ -72,15 +214,10 @@
     "Zenodo DOI + README badge (after steps 5–6 pass)"
   ],
 
-  "progress_public_lite": {
-    "repo_map_doc": "done",
-    "roadmap_knowledge_doc": "done",
-    "manifest_entrypoints": "updated",
-    "addon_lite": "present",
-    "sample_min_scene_export": "present",
-    "readme_banner_units": "tbd",
-    "defensive_tpa_schema_example": "tbd"
-  },
+  "prompt_template": "manifest\nroadmap\n— Task: GN_PAL_Board_Lite → pași + criterii de acceptare\n— Apoi: Markeri CNC → export CSV/TCN (Vitap K2) din sample\n",
 
-  "gates": { "doi_after_e2e": true, "repeatability_hashes": 2, "k2_import_ok": true }
+  "validation": {
+    "required_sections": ["repo","manifest_hint","units","gn_pal_board_lite","cnc_markers","schemas","exporters","e2e_demo","gates","qa_checklist","roadmap_e2e_lite"],
+    "json_schema_style": "defensive"
+  }
 }
