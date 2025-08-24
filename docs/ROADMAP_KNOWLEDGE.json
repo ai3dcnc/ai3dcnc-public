@@ -1,11 +1,12 @@
 {
   "ts": "2025-08-24T00:00:00Z",
-  "profile": "roadmap knowledge for AI_TOOLS",
+  "profile": "roadmap knowledge for AI_TOOLS (public-lite)",
+  "doc_ref": "docs/ROADMAP_EXEC.md",
 
   "units": { "internal": "m", "cam": "mm", "ui_decimals": 3 },
 
   "manifest_hint": {
-    "entrypoints": ["parsers_all.py","builders_all.py","docs/ROADMAP_KNOWLEDGE.json"],
+    "entrypoints": ["parsers_all.py", "builders_all.py", "docs/ROADMAP_KNOWLEDGE.json"],
     "note": "Loaded automatically at manifest."
   },
 
@@ -22,20 +23,27 @@
   },
 
   "canturi_materiale_viewmode_blender42": {
-    "panouri_pal": { "thickness": 18, "axes": { "x":"width","y":"depth","z":"thickness" } },
+    "panouri_pal": { "thickness_mm": 18, "axes": { "x": "width", "y": "depth", "z": "thickness" } },
     "edges_mm": [0, 0.8, 1, 2],
-    "toggle_show_band": true,
     "material_edge_band": "EDGE_BAND",
+    "toggle_show_band": true,
     "view_mode": {
       "bevel": { "angle_deg": 30, "width_mm": [0.5, 0.8], "segments": [1, 2] },
-      "normals": ["Harden", "Weighted"], "auto_smooth_deg": 30, "viewport_hint": "Cavity"
+      "normals": ["Harden", "Weighted"],
+      "auto_smooth_deg": 30,
+      "viewport_hint": "Cavity"
     }
   },
 
   "cnc_markers": {
-    "types": ["DRILL","SLOT","EDGE_DRILL","COUNTERSINK"],
+    "types": ["DRILL", "SLOT", "EDGE_DRILL", "COUNTERSINK"],
     "geometry": "empties or points; parsable",
     "reference": "finished edges; switch via from_finished_edges"
+  },
+
+  "schemas": {
+    "mesh_v1": "schemas/mesh_v1.schema.json",
+    "tpa_v1": "schemas/tpa_v1.schema.json"
   },
 
   "exporters": {
@@ -44,19 +52,14 @@
     "tcn": "minimal TPA dialect for Vitap K2 (probe)"
   },
 
+  "samples": {
+    "min_scene_export": "samples/min_scene_export.json",
+    "tpa_example": "samples/tpa_example_v1.json"
+  },
+
   "qc_visual": { "hole_bottom_color": "green", "rest_color": "purple" },
 
   "preferences": { "lang_code": "EN code / RO chat" },
-
-  "progress_public_lite": {
-    "repo_map_doc": "done",
-    "roadmap_knowledge_doc": "done",
-    "manifest_entrypoints": "updated",
-    "addon_lite": "present",
-    "sample_min_scene_export": "present",
-    "readme_banner_units": "tbd",
-    "defensive_tpa_schema_example": "tbd"
-  },
 
   "roadmap_e2e_lite": [
     "Freeze spec: lock INTRODUCTION + manifest; units m→mm at export",
@@ -69,9 +72,15 @@
     "Zenodo DOI + README badge (after steps 5–6 pass)"
   ],
 
-  "gates": {
-    "doi_after_e2e": true,
-    "repeatability_hashes": 2,
-    "k2_import_ok": true
-  }
+  "progress_public_lite": {
+    "repo_map_doc": "done",
+    "roadmap_knowledge_doc": "done",
+    "manifest_entrypoints": "updated",
+    "addon_lite": "present",
+    "sample_min_scene_export": "present",
+    "readme_banner_units": "tbd",
+    "defensive_tpa_schema_example": "tbd"
+  },
+
+  "gates": { "doi_after_e2e": true, "repeatability_hashes": 2, "k2_import_ok": true }
 }
