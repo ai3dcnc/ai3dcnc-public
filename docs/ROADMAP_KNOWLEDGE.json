@@ -1,0 +1,54 @@
+{
+  "ts": "2025-08-24T00:00:00Z",
+  "profile": "roadmap knowledge for AI_TOOLS",
+  "units": {
+    "internal": "m",
+    "cam": "mm",
+    "ui_decimals": 3
+  },
+  "canturi_materiale_viewmode_blender42": {
+    "panouri_pal": {
+      "thickness": 18,
+      "axes": {"x": "width", "y": "depth", "z": "thickness"},
+      "edges": [0, 0.8, 1, 2],
+      "toggle_show_band": true
+    },
+    "view_mode": {
+      "bevel": {"angle": 30, "width": [0.5, 0.8], "segments": [1, 2]},
+      "normals": ["harden", "weighted"],
+      "auto_smooth_angle": 30,
+      "viewport": "cavity_highlight"
+    },
+    "cnc": {
+      "markers_from_finished_edges": true,
+      "switch": "from_finished_edges"
+    },
+    "qc_tpa": {"fund_green": true, "rest_purple": true},
+    "export": ["CSV", "TXT", "DXF_optional", "TCN_future"],
+    "next": ["script BOM cant", "mapping feronerie GN"]
+  },
+  "keros_context": {
+    "blender_versions": ["4.2", "3.6 LTS"],
+    "gn_plate": "parametric PAL with X/Y/Z and override thickness",
+    "markers": ["DRILL", "SLOT", "COUNTERSINK", "EDGE_DRILL"],
+    "coords": "referenced from finished edges"
+  },
+  "materials_logic": {
+    "policy": "semi-strict",
+    "rule": "material code → thickness standard",
+    "override": "manual allowed, flagged if != standard"
+  },
+  "automations_soft_robots": {
+    "google_sheets": "present but inactive",
+    "notify": "present but inactive",
+    "activation": "after builders + CNC exporters"
+  },
+  "preferences": {
+    "units": "m (3 decimals)",
+    "export": "mm",
+    "lang_code": "English for code/comments, Romanian for chat"
+  },
+  "next_steps": {
+    "gn_plate": "simple GN for PAL board with edges + thickness control"
+  }
+}
