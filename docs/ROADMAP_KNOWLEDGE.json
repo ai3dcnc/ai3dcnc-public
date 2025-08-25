@@ -1,9 +1,13 @@
 {
-  "ts": "2025-08-24T00:00:00Z",
-  "version": "1.1",
+  "ts": "2025-08-25T00:00:00Z",
+  "version": "1.2",
+  "schema_version": "2025-08-25",
+  "tcn_grammar_version": "1.0",
   "strict": true,
-  "profile": "AI_TOOLS public-lite roadmap knowledge (explicit, zero-ambiguity)",
+  "profile": "AI_TOOLS public-lite roadmap knowledge (EN)",
   "doc_ref": "docs/ROADMAP_EXEC.md",
+
+  "legal": {"license": "Apache-2.0", "no_vendor_files": true, "disclaimer": "No vendor files redistributed. Specs and code only."},
 
   "repo": {
     "slug": "ai3dcnc/ai3dcnc-public",
@@ -20,23 +24,28 @@
       "roadmap": "docs/ROADMAP_KNOWLEDGE.json"
     },
     "required_keys": ["raw_base", "entrypoints", "aliases"],
-    "note": "Roadmap is sourced from this file via manifest. INTRODUCTION remains the sole technical spec." 
+    "note": "Roadmap is sourced from this file via manifest. INTRODUCTION remains the only technical spec."
   },
 
   "units": {
     "internal": "m",
     "cam": "mm",
     "ui_decimals": 3,
-    "conversion": "mm = round(m * 1000.0, 3)",
+    "conversion": "mm = m * 1000",
+    "storage": "optional: store micrometers as integers (um_int) for lossless math; format to 3 decimals only on export",
     "rounding": { "at_export_only": true, "precision_mm_allowed": [1, 0] }
   },
 
-  "axes": { "x": "width", "y": "depth", "z": "thickness", "origin": "Front-Left-Bottom of core" },
-  "references": { "from_finished_edges": true, "switch": "from_finished_edges" },
+  "coordinates": {
+    "axes": { "x": "width", "y": "depth", "z": "thickness" },
+    "origin": "Front-Left-Bottom of core",
+    "sides": ["F","B","L","R","T","D"],
+    "references": { "default": "finished", "switch": "from_finished_edges" }
+  },
 
   "materials_logic": {
     "policy": "semi-strict",
-    "rule": "material code → standard thickness; override allowed and flagged",
+    "rule": "material code -> standard thickness; override allowed and flagged",
     "mapping_examples": [
       {"code": "H1137", "thickness_mm": 18},
       {"code": "U999",  "thickness_mm": 18}
@@ -73,7 +82,7 @@
     },
     "acceptance": [
       "Dimensions in meters (3 decimals)",
-      "ThicknessOverride_mm ≠ standard ⇒ attribute is_override=1",
+      "ThicknessOverride_mm != standard -> attribute is_override=1",
       "Show_Band toggles EdgeBands on/off",
       "EDGE_BAND material present on bands"
     ]
@@ -99,58 +108,22 @@
   },
 
   "schemas": {
-    "mesh_v1": "schemas/mesh_v1.schema.json",
-    "tpa_v1": "schemas/tpa_v1.schema.json",
-    "tpa_example": "samples/tpa_example_v1.json",
-    "tpa_v1_schema_inline_mm": {
-      "$id": "tpa_v1.schema.json",
-      "type": "object",
-      "required": ["ops_mm"],
-      "properties": {
-        "ops_mm": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["type","side","x_mm","y_mm","depth_mm"],
-            "properties": {
-              "type": {"enum": ["DRILL","SLOT","EDGE_DRILL","COUNTERSINK"]},
-              "side": {"enum": ["F","B","L","R","T","D"]},
-              "x_mm": {"type": "number"},
-              "y_mm": {"type": "number"},
-              "z_mm": {"type": "number"},
-              "d_mm": {"type": "number"},
-              "w_mm": {"type": "number"},
-              "depth_mm": {"type": "number"},
-              "angle_deg": {"type": "number"},
-              "ref": {"enum": ["finished","core"]}
-            }
-          }
-        }
-      }
-    }
+    "ops_json_schema_ref": "schemas/ops_json.schema.json",
+    "machine_profile_schema_ref": "schemas/machine_profile.schema.json",
+    "tpa_example_ref": "samples/tpa_example_v1.json"
   },
 
   "exporters": {
-    "conversion_m_to_mm": "mm = round(m * 1000.0, 3)",
+    "conversion_m_to_mm": "mm = m * 1000",
     "csv": {
       "header": ["job_id","panel_id","type","side","x_mm","y_mm","z_mm","d_mm","w_mm","depth_mm","angle_deg","ref","notes"],
-      "example_row": "job01,P001,DRILL,F,120.000,250.000,0.000,5.000,,18.000,0,finished,probe"
+      "csv_example_ref": "samples/ops_example_v1.csv",
+      "csv_example_sha1": "TBD"
     },
     "tcn_min_vitap_k2": {
       "format": "ini_like",
-      "lines": [
-        "[HEADER]",
-        "MACHINE=VITAP_K2",
-        "UNITS=MM",
-        "",
-        "[DRILL]",
-        "SIDE=F",
-        "X=120.000",
-        "Y=250.000",
-        "D=5.000",
-        "DEPTH=18.000",
-        "REF=FINISHED"
-      ],
+      "tcn_min_ref": "samples/tcn_min_v1.tcn",
+      "tcn_min_sha1": "TBD",
       "slot_extras": ["W=6.000","ANGLE=0"]
     },
     "dxf_qa": {"units": "m", "layers": ["CUT_OUTER","DRILL","SLOT"]}
@@ -171,10 +144,8 @@
     ]
   },
 
-  "machine_probes": {
-    "vitap_k2": ["Import .tcn", "Verify positions", "Verify diameters", "Verify depths"],
-    "homag": ["Cutter circular sample from CSV", "Note compatibility"]
-  },
+
+  "machine_profile": { "default_profile_id": "Vitap_K2", "profile_ref": "profiles/Vitap_K2.profile.json", "profile_sha1": "TBD" },
 
   "release": {
     "when": "after E2E + machine probes pass",
@@ -191,12 +162,12 @@
     "defensive_tpa_schema_example": "tbd"
   },
 
-  "gates": { "doi_after_e2e": true, "repeatability_hashes": 2, "k2_import_ok": true, "readme_banner_units": true },
+  "gates_flags": { "k2_import_ok": true, "repeatability_hashes": 2, "readme_banner_units": true, "doi_after_e2e": true },
 
   "qa_checklist": [
-    "Units design=m, export=mm",
+    "Design in m, export in mm",
     "Edge bands material = EDGE_BAND",
-    "Normals hardened + weighted; AutoSmooth ≈ 30°",
+    "Normals hardened + weighted; AutoSmooth ~ 30 deg",
     "Markers reference from finished edges",
     "CSV header exactly as specified",
     "TCN UNITS=MM present",
@@ -204,20 +175,104 @@
   ],
 
   "roadmap_e2e_lite": [
-    "Freeze spec: lock INTRODUCTION + manifest; units m→mm at export",
+    "Freeze spec: lock INTRODUCTION + manifest; units m->mm at export",
     "GN PAL board Lite: X/Y/Z, thickness from material code + override flagged; F/B/L/R edge bands with proper UV",
-    "Markers + schema: DRILL/SLOT/EDGE_DRILL/COUNTERSINK; schemas/tpa_v1.schema.json (mm) + example",
+    "Markers + schema: DRILL/SLOT/EDGE_DRILL/COUNTERSINK; schemas/ops_json.schema.json (mm) + example",
     "CNC exporters Lite: CSV/TXT canonical; DXF optional; minimal .tcn for Vitap K2",
-    "E2E demo public: run parsers on min scene; capture [SUMMARY] → docs/TEST_E2E.md",
-    "Machine probes: Vitap K2 import .tcn; Homag cutter circular sample",
+    "E2E demo public: run parsers on min scene; capture [SUMMARY] -> docs/TEST_E2E.md",
+    "Machine probes: Vitap K2 import .tcn; Homag circular cutter sample",
     "Tag pre-release v0.1-lite + CITATION.cff",
     "Zenodo DOI + README badge (after steps 5–6 pass)"
   ],
 
-  "prompt_template": "manifest\nroadmap\n— Task: GN_PAL_Board_Lite → pași + criterii de acceptare\n— Apoi: Markeri CNC → export CSV/TCN (Vitap K2) din sample\n",
+  "tooling_cli": [
+    "ai3dcnc tcn validate   --in ops.tcn --machine Vitap_K2",
+    "ai3dcnc tcn to-json    --in ops.tcn --out ops.json --machine Vitap_K2",
+    "ai3dcnc tcn from-json  --in ops.json --out ops.tcn --machine Vitap_K2",
+    "ai3dcnc dxf to-tcn     --in drawing.dxf --out ops.tcn --machine Vitap_K2",
+    "ai3dcnc report html    --run last --out reports/run_001.html"
+  ],
 
-  "validation": {
-    "required_sections": ["repo","manifest_hint","units","gn_pal_board_lite","cnc_markers","schemas","exporters","e2e_demo","gates","qa_checklist","roadmap_e2e_lite"],
-    "json_schema_style": "defensive"
-  }
+  "examples": {
+    "scene_m_inline_min": {
+      "version": "1.0",
+      "units": "m",
+      "ref": "finished",
+      "ops_m": [
+        {"type": "DRILL", "side": "F", "x_m": 0.120, "y_m": 0.250, "d_m": 0.005, "depth_m": 0.018},
+        {"type": "SLOT", "side": "B", "x_m": 0.050, "y_m": 0.400, "w_m": 0.006, "depth_m": 0.010, "angle_deg": 0}
+      ]
+    },
+    "json_tpa_mm_inline_min": {
+      "version": "1.0",
+      "units": "mm",
+      "ref": "finished",
+      "ops_mm": [
+        {"type": "DRILL", "side": "F", "x_mm": 120.0, "y_mm": 250.0, "d_mm": 5.0, "depth_mm": 18.0},
+        {"type": "SLOT", "side": "B", "x_mm": 50.0, "y_mm": 400.0, "w_mm": 6.0, "depth_mm": 10.0, "angle_deg": 0}
+      ]
+    }
+  },
+
+  "mappings": {
+    "ref": { "json": ["finished", "core"], "tcn": ["FINISHED", "CORE"] }
+  },
+
+  "test_corpus": {
+    "tcn": [
+      {"name": "drill_grid_3x3", "tags": ["DRILL","F"]},
+      {"name": "slot_longitudinal_angle0", "tags": ["SLOT","B"]},
+      {"name": "edge_drill_line_L", "tags": ["EDGE_DRILL","L"]},
+      {"name": "countersink_pair", "tags": ["COUNTERSINK","T"]},
+      {"name": "profile_rectangle_outer", "tags": ["PROFILE"]},
+      {"name": "saw_cut_90", "tags": ["SAW"]},
+      {"name": "saw_cut_45", "tags": ["SAW"]},
+      {"name": "mix_core_ref", "tags": ["MIXED","core"]},
+      {"name": "thickness_override_16_18_19", "tags": ["THICKNESS"]},
+      {"name": "edge_limits", "tags": ["LIMITS"]}
+    ],
+    "dxf": [
+      {"name": "cut_outer_simple", "layers": ["CUT_OUTER"]},
+      {"name": "cut_with_holes", "layers": ["CUT_OUTER","DRILL"]},
+      {"name": "slots_layered", "layers": ["SLOT"]},
+      {"name": "drill_prefix_text", "prefix": ["DL 5.0","DL 8.0"]},
+      {"name": "mixed_all", "layers": ["CUT_OUTER","DRILL","SLOT"]}
+    ]
+  },
+
+  "ci": {
+    "workflow_ref": ".github/workflows/ai3dcnc.yml",
+    "python": "3.11",
+    "jobs": ["schema-check","lint","unit-tests","corpus-tests","round-trip","report-html"],
+    "commands": [
+      "ai3dcnc schemas validate",
+      "ai3dcnc corpus run --roundtrip",
+      "ai3dcnc report html --run last"
+    ],
+    "artifacts": ["exports/*.tcn","exports/*.json","reports/*.html","hashes.txt"]
+  },
+
+  "risks": [
+    {"id": "Z-sign", "mitigation": "machine_profile + field tests"},
+    {"id": "W-id-divergences", "mitigation": "per-machine mappings"},
+    {"id": "rounding", "mitigation": "fixed 3 decimals + idempotence test"}
+  ],
+
+  "milestones": [
+    {"id": "M1", "name": "Schema + parser", "done": false},
+    {"id": "M2", "name": "Generator + determinism", "done": false},
+    {"id": "M3", "name": "DXF mapper", "done": false},
+    {"id": "M4", "name": "CI + reports", "done": false},
+    {"id": "M5", "name": "Vitap K2 tests + v0.1-lite + DOI", "done": false}
+  ],
+
+  "next_steps": [
+    "Write schemas/ops_json.schema.json and schemas/machine_profile.schema.json",
+    "Implement TCN parser + rule validators",
+    "Generate TCN from JSON (DRILL, SLOT, PROFILE, SAW)",
+    "Seed corpus: 30 TCN + 10 DXF",
+    "Round-trip: TCN->JSON->TCN, KPI >= 95%",
+    "CI: HTML reports + artifacts",
+    "Vitap K2 tests + tag v0.1-lite + DOI"
+  ]
 }
