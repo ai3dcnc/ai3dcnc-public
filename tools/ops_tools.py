@@ -2,9 +2,11 @@ import json, sys, argparse, pathlib, csv
 from jsonschema import validate
 
 TCN_HEADER = ["; ai3dcnc v0.1-lite", "UNITS=MM"]
-CSV_HEADER = ["id","op","face","x_mm","y_mm","z_mm","dia_mm",
-              "x1_mm","y1_mm","x2_mm","y2_mm","width_mm",
-              "axis","offset_mm","length_mm"]
+CSV_HEADER = [
+    "id","op","face","x_mm","y_mm","z_mm","dia_mm",
+    "x1_mm","y1_mm","x2_mm","y2_mm","width_mm",
+    "axis","offset_mm","length_mm"
+]
 
 def _read_json(p):
     with open(p, "r", encoding="utf-8") as f:
@@ -109,6 +111,78 @@ def cmd_to_csv(ops_path, out_csv):
             w.writerow(row)
     return 0
 
+# ---------- TCN -> JSON ----------
+def _parse_kv(token):
+    if "=" not in token:
+        return token, None
+    k, v = token.split("=", 1)
+    try:
+        if v.upper() in ("X","Y"):
+            return k, v.upper()
+        if "." in v or "e" in v.lower():
+            return k, float(v)
+        return k, int(v)
+    except Exception:
+        return k, v
+
+def cmd_from_tcn(tcn_path, board_json_path, out_ops_json):
+    bj = _read_json(board_json_path)
+    board = bj.get("board", bj)
+    ops = []
+    with open(tcn_path, "r", encoding="utf-8") as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith(";") or line.startswith("UNITS="):
+                continue
+            parts = line.split()
+            kind = parts[0].upper()
+            kv = dict(_parse_kv(t) for t in parts[1:])
+            if kind == "DRILL":
+                ops.append({
+                    "id": str(kv.get("id","")),
+                    "op": "DRILL",
+                    "face": int(kv.get("FACE",1)),
+                    "x_mm": float(kv.get("X",0)),
+                    "y_mm": float(kv.get("Y",0)),
+                    "z_mm": float(kv.get("Z",0)),
+                    "dia_mm": float(kv.get("W",0)),
+                })
+            elif kind == "SLOT":
+                ops.append({
+                    "id": str(kv.get("id","")),
+                    "op": "SLOT",
+                    "face": int(kv.get("FACE",1)),
+                    "x1_mm": float(kv.get("X1",0)),
+                    "y1_mm": float(kv.get("Y1",0)),
+                    "x2_mm": float(kv.get("X2",0)),
+                    "y2_mm": float(kv.get("Y2",0)),
+                    "width_mm": float(kv.get("W",0)),
+                    "z_mm": float(kv.get("Z",0)),
+                })
+            elif kind == "SAW":
+                ops.append({
+                    "id": str(kv.get("id","")),
+                    "op": "SAW",
+                    "face": int(kv.get("FACE",1)),
+                    "axis": str(kv.get("AXIS","X")),
+                    "offset_mm": float(kv.get("OFFSET",0)),
+                    "length_mm": float(kv.get("LENGTH",0)),
+                    "z_mm": float(kv.get("Z",0)),
+                })
+            else:
+                continue
+    doc = {
+        "version": "0.1-lite",
+        "units": "mm",
+        "from_finished_edges": True,
+        "board": board,
+        "ops": ops
+    }
+    pathlib.Path(out_ops_json).parent.mkdir(parents=True, exist_ok=True)
+    with open(out_ops_json, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False, indent=2)
+    return 0
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="ops_tools")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -126,6 +200,11 @@ def main(argv=None):
     c.add_argument("ops_json")
     c.add_argument("out_csv")
 
+    f = sub.add_parser("from-tcn", help="parse TCN into ops.json (needs board json)")
+    f.add_argument("in_tcn")
+    f.add_argument("board_json")
+    f.add_argument("out_ops_json")
+
     args = p.parse_args(argv)
     if args.cmd == "validate":
         return cmd_validate(args.ops_json, args.schema_json)
@@ -133,6 +212,8 @@ def main(argv=None):
         return cmd_to_tcn(args.ops_json, args.machine_profile_json, args.out_tcn)
     if args.cmd == "to-csv":
         return cmd_to_csv(args.ops_json, args.out_csv)
+    if args.cmd == "from-tcn":
+        return cmd_from_tcn(args.in_tcn, args.board_json, args.out_ops_json)
 
 if __name__ == "__main__":
     sys.exit(main())
