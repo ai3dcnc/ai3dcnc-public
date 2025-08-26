@@ -1,0 +1,4 @@
+; ai3dcnc corpus
+; single slot on face F
+UNITS=MM
+SLOT id=s1 FACE=1 X1=200 Y1=80 X2=300 Y2=80 W=6 Z=10 ANGLE=0
