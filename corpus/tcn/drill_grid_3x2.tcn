@@ -1,0 +1,9 @@
+; ai3dcnc corpus
+; grid 3x2 on face F
+UNITS=MM
+DRILL id=d1 FACE=1 X=100 Y=80  Z=15 W=5
+DRILL id=d2 FACE=1 X=200 Y=80  Z=15 W=5
+DRILL id=d3 FACE=1 X=300 Y=80  Z=15 W=5
+DRILL id=d4 FACE=1 X=100 Y=180 Z=15 W=5
+DRILL id=d5 FACE=1 X=200 Y=180 Z=15 W=5
+DRILL id=d6 FACE=1 X=300 Y=180 Z=15 W=5
