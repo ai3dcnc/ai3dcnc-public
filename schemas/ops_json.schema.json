@@ -39,6 +39,7 @@
   "$defs": {
     "mm": { "type": "number", "multipleOf": 0.001 },
     "face": { "type": "integer", "minimum": 1, "maximum": 7 },
+
     "drill": {
       "type": "object",
       "required": ["id", "op", "face", "x_mm", "y_mm", "z_mm", "dia_mm"],
@@ -54,6 +55,77 @@
         "dia_mm": { "$ref": "#/$defs/mm", "minimum": 1 }
       }
     },
-    "op": { "oneOf": [{ "$ref": "#/$defs/drill" }] }
+
+    "slot": {
+      "type": "object",
+      "required": ["id", "op", "face", "x1_mm", "y1_mm", "x2_mm", "y2_mm", "width_mm", "z_mm"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "op": { "const": "SLOT" },
+        "face": { "$ref": "#/$defs/face" },
+        "note": { "type": "string" },
+        "x1_mm": { "$ref": "#/$defs/mm" },
+        "y1_mm": { "$ref": "#/$defs/mm" },
+        "x2_mm": { "$ref": "#/$defs/mm" },
+        "y2_mm": { "$ref": "#/$defs/mm" },
+        "width_mm": { "$ref": "#/$defs/mm", "minimum": 1 },
+        "z_mm": { "$ref": "#/$defs/mm" }
+      }
+    },
+
+    "profile": {
+      "type": "object",
+      "required": ["id", "op", "face", "z_mm", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "op": { "const": "PROFILE" },
+        "face": { "$ref": "#/$defs/face" },
+        "note": { "type": "string" },
+        "z_mm": { "$ref": "#/$defs/mm" },
+        "path": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["type", "x_mm", "y_mm"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string", "enum": ["LINE", "ARC"] },
+              "x_mm": { "$ref": "#/$defs/mm" },
+              "y_mm": { "$ref": "#/$defs/mm" },
+              "radius_mm": { "$ref": "#/$defs/mm" },
+              "sweep_deg": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+
+    "saw": {
+      "type": "object",
+      "required": ["id", "op", "face", "axis", "offset_mm", "length_mm", "z_mm"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "op": { "const": "SAW" },
+        "face": { "$ref": "#/$defs/face" },
+        "note": { "type": "string" },
+        "axis": { "type": "string", "enum": ["X", "Y"] },
+        "offset_mm": { "$ref": "#/$defs/mm" },
+        "length_mm": { "$ref": "#/$defs/mm" },
+        "z_mm": { "$ref": "#/$defs/mm" }
+      }
+    },
+
+    "op": {
+      "oneOf": [
+        { "$ref": "#/$defs/drill" },
+        { "$ref": "#/$defs/slot" },
+        { "$ref": "#/$defs/profile" },
+        { "$ref": "#/$defs/saw" }
+      ]
+    }
   }
 }
