@@ -10,6 +10,16 @@
     "edge_bands": { "F": true, "B": false, "L": true, "R": false }
   },
   "ops": [
-    { "id": "d1", "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 80, "z_mm": 15, "dia_mm": 5 }
+    { "id": "d1", "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 80, "z_mm": 15, "dia_mm": 5 },
+    { "id": "s1", "op": "SLOT", "face": 1, "x1_mm": 200, "y1_mm": 80, "x2_mm": 300, "y2_mm": 80, "width_mm": 6, "z_mm": 10 },
+    {
+      "id": "p1", "op": "PROFILE", "face": 1, "z_mm": 5,
+      "path": [
+        { "type": "LINE", "x_mm": 0, "y_mm": 0 },
+        { "type": "LINE", "x_mm": 800, "y_mm": 0 },
+        { "type": "ARC",  "x_mm": 800, "y_mm": 50, "radius_mm": 50, "sweep_deg": 90 }
+      ]
+    },
+    { "id": "w1", "op": "SAW", "face": 1, "axis": "X", "offset_mm": 250, "length_mm": 400, "z_mm": 9 }
   ]
 }
