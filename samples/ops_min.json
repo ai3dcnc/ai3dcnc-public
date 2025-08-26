@@ -1,18 +1,15 @@
-*** a/samples/ops_min.json
---- b/samples/ops_min.json
-@@
-+{
-+  "version": "0.1-lite",
-+  "units": "mm",
-+  "from_finished_edges": true,
-+  "board": {
-+    "DL_mm": 800,
-+    "DH_mm": 500,
-+    "DS_mm": 18,
-+    "material": "PAL",
-+    "edge_bands": { "F": true, "B": false, "L": true, "R": false }
-+  },
-+  "ops": [
-+    { "id": "d1", "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 80, "z_mm": 15, "dia_mm": 5 }
-+  ]
-+}
+{
+  "version": "0.1-lite",
+  "units": "mm",
+  "from_finished_edges": true,
+  "board": {
+    "DL_mm": 800,
+    "DH_mm": 500,
+    "DS_mm": 18,
+    "material": "PAL",
+    "edge_bands": { "F": true, "B": false, "L": true, "R": false }
+  },
+  "ops": [
+    { "id": "d1", "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 80, "z_mm": 15, "dia_mm": 5 }
+  ]
+}
