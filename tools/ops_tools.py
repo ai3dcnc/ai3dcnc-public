@@ -3,8 +3,8 @@ from jsonschema import validate
 
 TCN_HEADER = ["; ai3dcnc v0.1-lite", "UNITS=MM"]
 
-def _read_json(p): 
-    with open(p, "r", encoding="utf-8") as f: 
+def _read_json(p):
+    with open(p, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def cmd_validate(ops_path, schema_path):
@@ -13,9 +13,8 @@ def cmd_validate(ops_path, schema_path):
     validate(instance=data, schema=schema)
     return 0
 
-def _fmt_mm(v): 
-    # Vitap K2 preferă 3 zecimale în multe posturi; păstrăm valoarea brută
-    return f"{float(v):.3f}".rstrip('0').rstrip('.') if isinstance(v,(int,float)) else str(v)
+def _fmt_mm(v):
+    return f"{float(v):.3f}".rstrip('0').rstrip('.') if isinstance(v, (int, float)) else str(v)
 
 def _line_drill(op):
     # DRILL id=d1 FACE=1 X=100 Y=80 Z=15 W=5
@@ -44,17 +43,36 @@ def _line_slot(op):
         "ANGLE=0",
     ])
 
+def _line_saw(op):
+    # SAW id=w1 FACE=1 AXIS=X OFFSET=250 LENGTH=400 Z=9
+    return " ".join([
+        "SAW",
+        f"id={op['id']}",
+        f"FACE={op['face']}",
+        f"AXIS={op['axis']}",
+        f"OFFSET={_fmt_mm(op['offset_mm'])}",
+        f"LENGTH={_fmt_mm(op['length_mm'])}",
+        f"Z={_fmt_mm(op['z_mm'])}",
+    ])
+
 def cmd_to_tcn(ops_path, profile_path, out_path):
     ops = _read_json(ops_path)["ops"]
+    profile = _read_json(profile_path)
     lines = list(TCN_HEADER)
+    # header opțional din profil
+    hc = profile.get("tcn", {}).get("header_comment")
+    if hc:
+        lines.insert(0, f"; {hc}")
     for op in ops:
         t = op.get("op")
         if t == "DRILL":
             lines.append(_line_drill(op))
         elif t == "SLOT":
             lines.append(_line_slot(op))
+        elif t == "SAW":
+            lines.append(_line_saw(op))
         else:
-            # Ignoră PROFILE/SAW în v0.1-lite generator
+            # PROFILE ignorat în v0.1-lite
             continue
     out = "\n".join(lines) + "\n"
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
@@ -70,9 +88,9 @@ def main(argv=None):
     v.add_argument("ops_json")
     v.add_argument("schema_json")
 
-    t = sub.add_parser("to-tcn", help="generate minimal TCN (DRILL,SLOT)")
+    t = sub.add_parser("to-tcn", help="generate minimal TCN (DRILL,SLOT,SAW)")
     t.add_argument("ops_json")
-    t.add_argument("machine_profile_json")  # rezervat pentru viitor
+    t.add_argument("machine_profile_json")
     t.add_argument("out_tcn")
 
     args = p.parse_args(argv)
