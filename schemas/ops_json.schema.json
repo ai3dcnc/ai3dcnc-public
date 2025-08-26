@@ -3,7 +3,7 @@
   "$id": "https://ai3dcnc.org/schemas/ops_json.schema.json",
   "title": "ai3dcnc ops json v0.1-lite",
   "type": "object",
-  "required": ["version","units","board","ops"],
+  "required": ["version", "units", "board", "ops"],
   "additionalProperties": false,
   "properties": {
     "version": { "type": "string", "const": "0.1-lite" },
@@ -11,57 +11,49 @@
     "from_finished_edges": { "type": "boolean", "default": true },
     "board": {
       "type": "object",
-      "required": ["DL_mm","DH_mm","DS_mm","material","edge_bands"],
+      "required": ["DL_mm", "DH_mm", "DS_mm", "material", "edge_bands"],
       "additionalProperties": false,
       "properties": {
-        "DL_mm": { "type":"number", "minimum":1, "multipleOf":0.001 },
-        "DH_mm": { "type":"number", "minimum":1, "multipleOf":0.001 },
-        "DS_mm": { "type":"number", "minimum":1, "multipleOf":0.001 },
-        "material": { "type":"string", "minLength":1 },
+        "DL_mm": { "type": "number", "minimum": 1, "multipleOf": 0.001 },
+        "DH_mm": { "type": "number", "minimum": 1, "multipleOf": 0.001 },
+        "DS_mm": { "type": "number", "minimum": 1, "multipleOf": 0.001 },
+        "material": { "type": "string", "minLength": 1 },
         "edge_bands": {
-          "type":"object",
+          "type": "object",
           "additionalProperties": false,
-          "properties": { "F":{"type":"boolean"}, "B":{"type":"boolean"}, "L":{"type":"boolean"}, "R":{"type":"boolean"} }
+          "properties": {
+            "F": { "type": "boolean" },
+            "B": { "type": "boolean" },
+            "L": { "type": "boolean" },
+            "R": { "type": "boolean" }
+          }
         }
       }
     },
     "ops": {
-      "type":"array",
-      "minItems":1,
-      "items": { "$ref":"#/$defs/op" }
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/op" }
     }
   },
   "$defs": {
-    "mm": { "type":"number", "multipleOf":0.001 },
-    "face": { "type":"integer", "minimum":1, "maximum":7 },
-    "op_common": {
-      "type":"object",
-      "required":["id","op","face"],
+    "mm": { "type": "number", "multipleOf": 0.001 },
+    "face": { "type": "integer", "minimum": 1, "maximum": 7 },
+    "drill": {
+      "type": "object",
+      "required": ["id", "op", "face", "x_mm", "y_mm", "z_mm", "dia_mm"],
       "additionalProperties": false,
-      "properties":{
-        "id": { "type":"string", "minLength":1 },
-        "op": { "type":"string", "enum":["DRILL"] },
-        "face": { "$ref":"#/$defs/face" },
-        "note": { "type":"string" }
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "op": { "const": "DRILL" },
+        "face": { "$ref": "#/$defs/face" },
+        "note": { "type": "string" },
+        "x_mm": { "$ref": "#/$defs/mm" },
+        "y_mm": { "$ref": "#/$defs/mm" },
+        "z_mm": { "$ref": "#/$defs/mm" },
+        "dia_mm": { "$ref": "#/$defs/mm", "minimum": 1 }
       }
     },
-    "drill": {
-      "allOf": [
-        { "$ref":"#/$defs/op_common" },
-        {
-          "type":"object",
-          "required":["x_mm","y_mm","z_mm","dia_mm"],
-          "additionalProperties": false,
-          "properties":{
-            "op": { "const":"DRILL" },
-            "x_mm": { "$ref":"#/$defs/mm" },
-            "y_mm": { "$ref":"#/$defs/mm" },
-            "z_mm": { "$ref":"#/$defs/mm" },
-            "dia_mm": { "$ref":"#/$defs/mm", "minimum":1 }
-          }
-        }
-      ]
-    },
-    "op": { "oneOf":[{ "$ref":"#/$defs/drill" }] }
+    "op": { "oneOf": [{ "$ref": "#/$defs/drill" }] }
   }
 }
