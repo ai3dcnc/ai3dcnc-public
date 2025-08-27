@@ -1,0 +1,9 @@
+﻿{
+  "version": "0.1-lite",
+  "units": "mm",
+  "from_finished_edges": true,
+  "board": { "DL_mm": 800, "DH_mm": 450, "DS_mm": 18 },
+  "ops": [
+    { "id": "w1", "op": "SAW", "face": 1, "axis": "X", "offset_mm": 250, "length_mm": 400, "z_mm": 9 }
+  ]
+}
