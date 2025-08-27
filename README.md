@@ -48,3 +48,8 @@ Developed by **Balaur Ionuț Doru / AI3DCNC**, with assistance from **ChatGPT (O
 ## Context and Inspiration
 
 For details about the relationship between KEROS and NodeKit, see [BACKGROUND.md](./BACKGROUND.md).
+
+
+ ## Docs
+ - [Defensive Publication](docs/defensive-publication.md)
++- [Memory Sets proposal](docs/MEMORY_SETS.md)
