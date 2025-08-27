@@ -1,0 +1,14 @@
+{
+  "version": "0.1-lite",
+  "units": "mm",
+  "from_finished_edges": true,
+  "board": { "DL_mm": 800, "DH_mm": 450, "DS_mm": 18 },
+  "ops": [
+    { "id": "d5",  "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 100, "z_mm": 10, "dia_mm": 5  },
+    { "id": "d8",  "op": "DRILL", "face": 1, "x_mm": 200, "y_mm": 100, "z_mm": 10, "dia_mm": 8  },
+    { "id": "d10", "op": "DRILL", "face": 1, "x_mm": 300, "y_mm": 100, "z_mm": 10, "dia_mm": 10 },
+    { "id": "d12", "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 200, "z_mm": 10, "dia_mm": 12 },
+    { "id": "d15", "op": "DRILL", "face": 1, "x_mm": 200, "y_mm": 200, "z_mm": 10, "dia_mm": 15 },
+    { "id": "d25", "op": "DRILL", "face": 1, "x_mm": 300, "y_mm": 200, "z_mm": 10, "dia_mm": 25 }
+  ]
+}
