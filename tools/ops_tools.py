@@ -135,6 +135,29 @@ def _tpa_slot_W_blocks(op, tool_id:int):
         f"W#2201{{ ::WTl  #8015=0 #1={x2} #2={y2} #3=-{z} #42=0 #49=0 }}W"
     ]
 
+def _tpa_saw_W1050(op, tool_id:int, start_x_mm:float=50.0, start_y_mm:float=50.0):
+    axis = str(op.get("axis","X")).upper()
+    z    = _fmt_mm(op["z_mm"])
+    off  = float(op["offset_mm"])
+    L    = float(op["length_mm"])
+
+    if axis == "X":
+        x0 = _fmt_mm(start_x_mm)
+        x1 = _fmt_mm(start_x_mm + L)
+        y  = _fmt_mm(off)
+        # #6=1 -> axa X; #8020=X0 #8021=Y const #8022=-Z; #8516=tool; #8517=X1
+        return [f"W#1050{{ ::WT2 WS=1  #8098=..\\custom\\mcr\\lame.tmcr #6=1 "
+                f"#8020={x0} #8021={y} #8022=-{z} #9505=0 #8503=0 #8509=0 "
+                f"#8514=1 #8515=1 #8516={int(tool_id)} #8517={x1} #8525=0 #8526=0 #8527=0 }}W"]
+    else:
+        # axa Y (fallback simplu)
+        y0 = _fmt_mm(start_y_mm)
+        y1 = _fmt_mm(start_y_mm + L)
+        x  = _fmt_mm(off)
+        return [f"W#1050{{ ::WT2 WS=1  #8098=..\\custom\\mcr\\lame.tmcr #6=2 "
+                f"#8020={x} #8021={y0} #8022=-{z} #9505=0 #8503=0 #8509=0 "
+                f"#8514=1 #8515=1 #8516={int(tool_id)} #8517={y1} #8525=0 #8526=0 #8527=0 }}W"]
+
 def cmd_to_tpa(ops_path, profile_path, out_path):
     # Vitap TpaCAD dialect (observat din fișier valid)
     doc = _read_json(ops_path)
@@ -149,6 +172,11 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
     tool_cfg = prof.get("tpa", {}).get("tools", {})
     tool_map = {str(k): int(v) for k, v in tool_cfg.get("mill_by_diam_mm", {}).items()}
     default_mill = int(tool_cfg.get("default_mill_id", 1004))
+    # SAW defaults
+    saw_tool_id = int(tool_cfg.get("saw_default_id", 2001))
+    saw_defaults = prof.get("tpa", {}).get("defaults", {})
+    saw_x0 = float(saw_defaults.get("saw_start_x_mm", 50))
+    saw_y0 = float(saw_defaults.get("saw_start_y_mm", 50))
 
     lines = [
         r"TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1",
@@ -174,12 +202,13 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
         if op.get("op") == "DRILL":
             x = _fmt_mm(op["x_mm"]); y = _fmt_mm(op["y_mm"])
             z = _fmt_mm(op["z_mm"]); d = _fmt_mm(op["dia_mm"])
-            # #205=1 (tool) păstrat generic pentru probe DRILL
             lines.append(f"W#81{{ ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205=1 #1001=0 #9505=0 }}W")
         elif op.get("op") == "SLOT":
             width = int(round(float(op["width_mm"])))
             tool_id = int(tool_map.get(str(width), default_mill))
             lines += _tpa_slot_W_blocks(op, tool_id)
+        elif op.get("op") == "SAW":
+            lines += _tpa_saw_W1050(op, saw_tool_id, start_x_mm=saw_x0, start_y_mm=saw_y0)
         else:
             continue
 
