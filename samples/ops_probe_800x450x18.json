@@ -1,0 +1,9 @@
+{
+  "version": "0.1-lite",
+  "units": "mm",
+  "from_finished_edges": true,
+  "board": { "DL_mm": 800, "DH_mm": 450, "DS_mm": 18 },
+  "ops": [
+    { "id": "d1", "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 100, "z_mm": 10, "dia_mm": 8 }
+  ]
+}
