@@ -1,5 +1,5 @@
-// minimal patch
 {
+  "raw_base": "https://raw.githubusercontent.com/ai3dcnc/ai3dcnc-public/main/",
   "entrypoints": [
     "parsers_all.py",
     "builders_all.py",
@@ -8,6 +8,15 @@
   "aliases": {
     "parsers_all": "parsers_all.py",
     "builders_all": "builders_all.py",
-    "ROADMAP_KNOWLEDGE": "docs/ROADMAP_KNOWLEDGE.json"
+    "ROADMAP_KNOWLEDGE": "docs/ROADMAP_KNOWLEDGE.json",
+    "roadmap": "docs/ROADMAP_KNOWLEDGE.json",
+    "ops_tools": "tools/ops_tools.py",
+    "ops_schema": "schemas/ops_json.schema.json",
+    "machine_profile_schema": "schemas/machine_profile.schema.json",
+    "vitap_k2_profile": "profiles/Vitap_K2.profile.json",
+    "e2e_ps1": "tools/test_e2e.ps1",
+    "e2e_workflow": ".github/workflows/e2e.yml",
+    "sample_ops_min": "samples/ops_min.json",
+    "sample_ops_probe_saw_x": "samples/ops_probe_saw_x.json"
   }
 }
