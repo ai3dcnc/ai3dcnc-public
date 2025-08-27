@@ -8,6 +8,8 @@ CSV_HEADER = [
     "axis","offset_mm","length_mm"
 ]
 
+FACE_MAP = {1:"F", 2:"B", 3:"L", 4:"R", 5:"T", 6:"D", 7:"C"}
+
 def _read_json(p):
     with open(p, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -21,6 +23,7 @@ def cmd_validate(ops_path, schema_path):
     validate(instance=data, schema=schema)
     return 0
 
+# ---------- simple TCN (ai3dcnc custom) ----------
 def _line_drill(op):
     return " ".join([
         "DRILL",
@@ -74,13 +77,13 @@ def cmd_to_tcn(ops_path, profile_path, out_path):
             lines.append(_line_saw(op))
         else:
             continue
-    # Scriere compatibilă TPACAD: CP1252, CRLF, fără BOM
-    data = ("\r\n".join(lines) + "\r\n").encode("cp1252", "replace")
+    data = ("\r\n".join(lines) + "\r\n").encode("cp1252", "replace")  # CRLF, CP1252, fără BOM
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "wb") as f:
         f.write(data)
     return 0
 
+# ---------- CSV ----------
 def cmd_to_csv(ops_path, out_csv):
     ops = _read_json(ops_path)["ops"]
     pathlib.Path(out_csv).parent.mkdir(parents=True, exist_ok=True)
@@ -112,6 +115,84 @@ def cmd_to_csv(ops_path, out_csv):
             w.writerow(row)
     return 0
 
+# ---------- TPA-CAD .TCN ----------
+def _num(v):  # 3 zecimale, CRLF writer se ocupă sus
+    try:
+        return f"{float(v):.3f}"
+    except Exception:
+        return str(v)
+
+def _side(face:int)->str:
+    return FACE_MAP.get(int(face), "F")
+
+def _tpa_block_drill(op):
+    return [
+        "[DRILL]",
+        f"SIDE={_side(op['face'])}",
+        f"X={_num(op['x_mm'])}",
+        f"Y={_num(op['y_mm'])}",
+        f"D={_num(op['dia_mm'])}",
+        f"DEPTH={_num(op['z_mm'])}",
+        "REF=FINISHED",
+    ]
+
+def _tpa_block_slot(op):
+    x1, y1, x2, y2 = float(op["x1_mm"]), float(op["y1_mm"]), float(op["x2_mm"]), float(op["y2_mm"])
+    dx, dy = x2 - x1, y2 - y1
+    if abs(dy) < 1e-6:
+        angle = 0
+        length = abs(dx)
+        x, y = (x1, y1) if dx >= 0 else (x2, y2)
+    elif abs(dx) < 1e-6:
+        angle = 90
+        length = abs(dy)
+        x, y = (x1, y1) if dy >= 0 else (x2, y2)
+    else:
+        # TPA linie: suportăm doar H/V în LITE; oblic ignorat
+        angle = 0
+        length = (dx*dx + dy*dy) ** 0.5
+        x, y = x1, y1
+    return [
+        "[SLOT]",
+        f"SIDE={_side(op['face'])}",
+        f"X={_num(x)}",
+        f"Y={_num(y)}",
+        f"W={_num(op['width_mm'])}",
+        f"LENGTH={_num(length)}",
+        f"ANGLE={int(angle)}",
+        f"DEPTH={_num(op['z_mm'])}",
+        "REF=FINISHED",
+    ]
+
+def cmd_to_tpa(ops_path, profile_path, out_path):
+    doc = _read_json(ops_path)
+    ops = doc["ops"]
+    prof = _read_json(profile_path)
+    machine = f"{prof.get('vendor','VITAP')}_{prof.get('model','K2')}"
+    name = pathlib.Path(out_path).stem
+
+    lines = [
+        "; ai3dcnc TPA exporter lite",
+        "[HEADER]",
+        f"MACHINE={machine}",
+        "UNITS=MM",
+        f"NAME={name}",
+    ]
+    for op in ops:
+        if op["op"] == "DRILL":
+            lines += _tpa_block_drill(op)
+        elif op["op"] == "SLOT":
+            lines += _tpa_block_slot(op)
+        else:
+            # SAW nepregătit pentru TPA în LITE
+            continue
+
+    data = ("\r\n".join(lines) + "\r\n").encode("cp1252", "replace")
+    pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "wb") as f:
+        f.write(data)
+    return 0
+
 # ---------- TCN -> JSON ----------
 def _parse_kv(token):
     if "=" not in token:
@@ -133,7 +214,7 @@ def cmd_from_tcn(tcn_path, board_json_path, out_ops_json):
     with open(tcn_path, "r", encoding="utf-8") as f:
         for raw in f:
             line = raw.strip()
-            if not line or line.startswith(";") or line.startswith("UNITS="):
+            if not line or line.startswith(";") or line.startswith("UNITS=") or line.startswith("["):
                 continue
             parts = line.split()
             kind = parts[0].upper()
@@ -201,6 +282,11 @@ def main(argv=None):
     c.add_argument("ops_json")
     c.add_argument("out_csv")
 
+    tp = sub.add_parser("to-tpa", help="generate TPACAD .tcn ([HEADER]/[DRILL]/[SLOT])")
+    tp.add_argument("ops_json")
+    tp.add_argument("machine_profile_json")
+    tp.add_argument("out_tcn")
+
     f = sub.add_parser("from-tcn", help="parse TCN into ops.json (needs board json)")
     f.add_argument("in_tcn")
     f.add_argument("board_json")
@@ -213,6 +299,8 @@ def main(argv=None):
         return cmd_to_tcn(args.ops_json, args.machine_profile_json, args.out_tcn)
     if args.cmd == "to-csv":
         return cmd_to_csv(args.ops_json, args.out_csv)
+    if args.cmd == "to-tpa":
+        return cmd_to_tpa(args.ops_json, args.machine_profile_json, args.out_tcn)
     if args.cmd == "from-tcn":
         return cmd_from_tcn(args.in_tcn, args.board_json, args.out_ops_json)
 
