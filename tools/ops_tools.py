@@ -74,10 +74,11 @@ def cmd_to_tcn(ops_path, profile_path, out_path):
             lines.append(_line_saw(op))
         else:
             continue
-    out = "\n".join(lines) + "\n"
+    # Scriere compatibilă TPACAD: CP1252, CRLF, fără BOM
+    data = ("\r\n".join(lines) + "\r\n").encode("cp1252", "replace")
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(out)
+    with open(out_path, "wb") as f:
+        f.write(data)
     return 0
 
 def cmd_to_csv(ops_path, out_csv):
