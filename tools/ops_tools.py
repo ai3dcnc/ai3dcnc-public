@@ -1,4 +1,4 @@
-import json, sys, argparse, pathlib, csv
+import json, sys, argparse, pathlib, csv, codecs
 from jsonschema import validate
 
 TCN_HEADER = ["; ai3dcnc v0.1-lite", "UNITS=MM"]
@@ -7,7 +7,6 @@ CSV_HEADER = [
     "x1_mm","y1_mm","x2_mm","y2_mm","width_mm",
     "axis","offset_mm","length_mm"
 ]
-
 FACE_MAP = {1:"F", 2:"B", 3:"L", 4:"R", 5:"T", 6:"D", 7:"C"}
 
 def _read_json(p):
@@ -77,7 +76,7 @@ def cmd_to_tcn(ops_path, profile_path, out_path):
             lines.append(_line_saw(op))
         else:
             continue
-    data = ("\r\n".join(lines) + "\r\n").encode("cp1252", "replace")  # CRLF, CP1252, fără BOM
+    data = ("\r\n".join(lines) + "\r\n").encode("cp1252", "replace")  # CRLF, CP1252
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "wb") as f:
         f.write(data)
@@ -115,83 +114,65 @@ def cmd_to_csv(ops_path, out_csv):
             w.writerow(row)
     return 0
 
-# ---------- TPA-CAD .TCN ----------
-def _num(v):  # 3 zecimale, CRLF writer se ocupă sus
+# ---------- TPA-CAD (.tcn ALBATROS/EDICAD) ----------
+def _write_utf16le_bom(out_path: str, lines):
+    data = ("\r\n".join(lines) + "\r\n").encode("utf-16-le")
+    pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "wb") as f:
+        f.write(codecs.BOM_UTF16_LE)
+        f.write(data)
+    return 0
+
+def _num(v):
     try:
         return f"{float(v):.3f}"
     except Exception:
         return str(v)
 
-def _side(face:int)->str:
-    return FACE_MAP.get(int(face), "F")
-
-def _tpa_block_drill(op):
-    return [
-        "[DRILL]",
-        f"SIDE={_side(op['face'])}",
-        f"X={_num(op['x_mm'])}",
-        f"Y={_num(op['y_mm'])}",
-        f"D={_num(op['dia_mm'])}",
-        f"DEPTH={_num(op['z_mm'])}",
-        "REF=FINISHED",
-    ]
-
-def _tpa_block_slot(op):
-    x1, y1, x2, y2 = float(op["x1_mm"]), float(op["y1_mm"]), float(op["x2_mm"]), float(op["y2_mm"])
-    dx, dy = x2 - x1, y2 - y1
-    if abs(dy) < 1e-6:
-        angle = 0
-        length = abs(dx)
-        x, y = (x1, y1) if dx >= 0 else (x2, y2)
-    elif abs(dx) < 1e-6:
-        angle = 90
-        length = abs(dy)
-        x, y = (x1, y1) if dy >= 0 else (x2, y2)
-    else:
-        # TPA linie: suportăm doar H/V în LITE; oblic ignorat
-        angle = 0
-        length = (dx*dx + dy*dy) ** 0.5
-        x, y = x1, y1
-    return [
-        "[SLOT]",
-        f"SIDE={_side(op['face'])}",
-        f"X={_num(x)}",
-        f"Y={_num(y)}",
-        f"W={_num(op['width_mm'])}",
-        f"LENGTH={_num(length)}",
-        f"ANGLE={int(angle)}",
-        f"DEPTH={_num(op['z_mm'])}",
-        "REF=FINISHED",
-    ]
-
 def cmd_to_tpa(ops_path, profile_path, out_path):
+    # Vitap TpaCAD dialect (observat din fișier valid)
     doc = _read_json(ops_path)
     ops = doc["ops"]
-    prof = _read_json(profile_path)
-    machine = f"{prof.get('vendor','VITAP')}_{prof.get('model','K2')}"
-    name = pathlib.Path(out_path).stem
+    board = doc.get("board", {})
+    DL = int(board.get("DL_mm", 800))
+    DH = int(board.get("DH_mm", 450))
+    DS = int(board.get("DS_mm", 18))
 
     lines = [
-        "; ai3dcnc TPA exporter lite",
-        "[HEADER]",
-        f"MACHINE={machine}",
-        "UNITS=MM",
-        f"NAME={name}",
+        r"TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1",
+        "::SIDE=0;1;",
+        "::ATTR=hide;varv",
+        f"::UNm DL={DL} DH={DH} DS={DS}",
+        "'tcn version=2.8.21",
+        "'code=unicode",
+        "EXE{", "#0=0", "#1=0", "#2=0", "#3=0", "#4=0", "}EXE",
+        "OFFS{", "#0=0.0|0", "#1=0.0|0", "#2=0.0|0", "}OFFS",
+        "VARV{", "#0=0.0|0", "#1=0.0|0", "}VARV",
+        "VAR{", "}VAR",
+        "SPEC{", "}SPEC",
+        "INFO{", "}INFO",
+        "OPTI{", ":: OPTKIND=%;0 OPTROUTER=%;0 LSTCOD=%0%1%2", "}OPTI",
+        "LINK{", "}LINK",
+        "SIDE#0{", "}SIDE",
+        "SIDE#1{",
+        "$=Up",
     ]
     for op in ops:
-        if op["op"] == "DRILL":
-            lines += _tpa_block_drill(op)
-        elif op["op"] == "SLOT":
-            lines += _tpa_block_slot(op)
-        else:
-            # SAW nepregătit pentru TPA în LITE
+        if op.get("op") != "DRILL":
             continue
-
-    data = ("\r\n".join(lines) + "\r\n").encode("cp1252", "replace")
-    pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "wb") as f:
-        f.write(data)
-    return 0
+        x = _fmt_mm(op["x_mm"])
+        y = _fmt_mm(op["y_mm"])
+        z = _fmt_mm(op["z_mm"])
+        d = _fmt_mm(op["dia_mm"])
+        lines.append(f"W#81{{ ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205=1 #1001=0 #9505=0 }}W")
+    lines += [
+        "}SIDE",
+        "SIDE#3{", "::DX=0 XY=1", "}SIDE",
+        "SIDE#4{", "::DX=0 XY=1", "}SIDE",
+        "SIDE#5{", "::DX=0 XY=1", "}SIDE",
+        "SIDE#6{", "::DX=0 XY=1", "}SIDE",
+    ]
+    return _write_utf16le_bom(out_path, lines)
 
 # ---------- TCN -> JSON ----------
 def _parse_kv(token):
@@ -214,7 +195,7 @@ def cmd_from_tcn(tcn_path, board_json_path, out_ops_json):
     with open(tcn_path, "r", encoding="utf-8") as f:
         for raw in f:
             line = raw.strip()
-            if not line or line.startswith(";") or line.startswith("UNITS=") or line.startswith("["):
+            if not line or line.startswith(";") or line.startswith("UNITS=") or line.startswith("[") or line.startswith("TPA\\"):
                 continue
             parts = line.split()
             kind = parts[0].upper()
@@ -282,7 +263,7 @@ def main(argv=None):
     c.add_argument("ops_json")
     c.add_argument("out_csv")
 
-    tp = sub.add_parser("to-tpa", help="generate TPACAD .tcn ([HEADER]/[DRILL]/[SLOT])")
+    tp = sub.add_parser("to-tpa", help="generate Vitap TpaCAD .tcn (ALBATROS/EDICAD)")
     tp.add_argument("ops_json")
     tp.add_argument("machine_profile_json")
     tp.add_argument("out_tcn")
