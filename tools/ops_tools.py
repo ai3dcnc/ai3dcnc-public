@@ -23,6 +23,7 @@ def cmd_validate(ops_path, schema_path):
     return 0
 
 # ---------- simple TCN (ai3dcnc custom) ----------
+
 def _line_drill(op):
     return " ".join([
         "DRILL",
@@ -83,6 +84,7 @@ def cmd_to_tcn(ops_path, profile_path, out_path):
     return 0
 
 # ---------- CSV ----------
+
 def cmd_to_csv(ops_path, out_csv):
     ops = _read_json(ops_path)["ops"]
     pathlib.Path(out_csv).parent.mkdir(parents=True, exist_ok=True)
@@ -115,6 +117,7 @@ def cmd_to_csv(ops_path, out_csv):
     return 0
 
 # ---------- TPA-CAD (.tcn ALBATROS/EDICAD) ----------
+
 def _write_utf16le_bom(out_path: str, lines):
     data = ("\r\n".join(lines) + "\r\n").encode("utf-16-le")
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
@@ -123,11 +126,14 @@ def _write_utf16le_bom(out_path: str, lines):
         f.write(data)
     return 0
 
-def _num(v):
-    try:
-        return f"{float(v):.3f}"
-    except Exception:
-        return str(v)
+def _tpa_slot_W_blocks(op, tool_id:int):
+    x1 = _fmt_mm(op["x1_mm"]); y1 = _fmt_mm(op["y1_mm"])
+    x2 = _fmt_mm(op["x2_mm"]); y2 = _fmt_mm(op["y2_mm"])
+    z  = _fmt_mm(op["z_mm"])
+    return [
+        f"W#89{{ ::WTs WS=1  #8015=0 #1={x1} #2={y1} #3=-{z} #201=1 #203=1 #205={tool_id} #1001=100 #9502=0 #9503=0 #9505=0 #9506=0 #9504=0 #8101=0 #8096=0 #8095=0 #37=0 #40=0 #39=0 #46=0 #8135=0 #8136=0 #38=0 #8180=0 #8181=0 #8185=0 #8186=0 }}W",
+        f"W#2201{{ ::WTl  #8015=0 #1={x2} #2={y2} #3=-{z} #42=0 #49=0 }}W"
+    ]
 
 def cmd_to_tpa(ops_path, profile_path, out_path):
     # Vitap TpaCAD dialect (observat din fișier valid)
@@ -137,6 +143,12 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
     DL = int(board.get("DL_mm", 800))
     DH = int(board.get("DH_mm", 450))
     DS = int(board.get("DS_mm", 18))
+
+    # tool mapping din profil
+    prof = _read_json(profile_path)
+    tool_cfg = prof.get("tpa", {}).get("tools", {})
+    tool_map = {str(k): int(v) for k, v in tool_cfg.get("mill_by_diam_mm", {}).items()}
+    default_mill = int(tool_cfg.get("default_mill_id", 1004))
 
     lines = [
         r"TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1",
@@ -157,14 +169,20 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
         "SIDE#1{",
         "$=Up",
     ]
+
     for op in ops:
-        if op.get("op") != "DRILL":
+        if op.get("op") == "DRILL":
+            x = _fmt_mm(op["x_mm"]); y = _fmt_mm(op["y_mm"])
+            z = _fmt_mm(op["z_mm"]); d = _fmt_mm(op["dia_mm"])
+            # #205=1 (tool) păstrat generic pentru probe DRILL
+            lines.append(f"W#81{{ ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205=1 #1001=0 #9505=0 }}W")
+        elif op.get("op") == "SLOT":
+            width = int(round(float(op["width_mm"])))
+            tool_id = int(tool_map.get(str(width), default_mill))
+            lines += _tpa_slot_W_blocks(op, tool_id)
+        else:
             continue
-        x = _fmt_mm(op["x_mm"])
-        y = _fmt_mm(op["y_mm"])
-        z = _fmt_mm(op["z_mm"])
-        d = _fmt_mm(op["dia_mm"])
-        lines.append(f"W#81{{ ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205=1 #1001=0 #9505=0 }}W")
+
     lines += [
         "}SIDE",
         "SIDE#3{", "::DX=0 XY=1", "}SIDE",
@@ -175,6 +193,7 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
     return _write_utf16le_bom(out_path, lines)
 
 # ---------- TCN -> JSON ----------
+
 def _parse_kv(token):
     if "=" not in token:
         return token, None
@@ -284,6 +303,8 @@ def main(argv=None):
         return cmd_to_tpa(args.ops_json, args.machine_profile_json, args.out_tcn)
     if args.cmd == "from-tcn":
         return cmd_from_tcn(args.in_tcn, args.board_json, args.out_ops_json)
+
+    return 1
 
 if __name__ == "__main__":
     sys.exit(main())
