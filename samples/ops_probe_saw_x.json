@@ -1,9 +1,13 @@
 ﻿{
   "version": "0.1-lite",
   "units": "mm",
-  "from_finished_edges": true,
-  "board": { "DL_mm": 800, "DH_mm": 450, "DS_mm": 18 },
+  "board": {
+    "DL_mm": 800, "DH_mm": 450, "DS_mm": 18,
+    "material": "PB",
+    "edge_bands": { "F": false, "B": false, "L": false, "R": false }
+  },
   "ops": [
-    { "id": "w1", "op": "SAW", "face": 1, "axis": "X", "offset_mm": 250, "length_mm": 400, "z_mm": 9 }
+    { "id": "saw1", "op": "SAW", "face": 1,
+      "axis": "X", "offset_mm": 250, "length_mm": 400, "z_mm": 9 }
   ]
 }
