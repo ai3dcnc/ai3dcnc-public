@@ -1,4 +1,4 @@
-import json, sys, argparse, pathlib, csv, codecs
+import json, sys, argparse, pathlib, csv, codecs, os
 from jsonschema import validate
 
 # ------------------ Helpers ------------------
@@ -11,9 +11,12 @@ CSV_HEADER = [
 
 
 def _read_json(p: str):
-    """Read JSON accepting UTF-8 with or without BOM."""
-    with open(p, "r", encoding="utf-8-sig") as f:
-        return json.load(f)
+    """Read JSON accepting UTF-8 with or without BOM. Better error on missing file."""
+    try:
+        with open(p, "r", encoding="utf-8-sig") as f:
+            return json.load(f)
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"missing file: {p} (cwd={os.getcwd()})") from e
 
 
 def _fmt_mm(v):
@@ -30,6 +33,7 @@ def cmd_validate(ops_path, schema_path):
     data = _read_json(ops_path)
     schema = _read_json(schema_path)
     validate(instance=data, schema=schema)
+    print(f"valid: {ops_path} against {schema_path}")
     return 0
 
 
@@ -93,6 +97,7 @@ def cmd_to_tcn(ops_path, profile_path, out_path):
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "wb") as f:
         f.write(data)
+    print(f"written: {out_path}")
     return 0
 
 
@@ -127,6 +132,7 @@ def cmd_to_csv(ops_path, out_csv):
                 row["length_mm"] = _fmt_mm(op.get("length_mm"))
                 row["z_mm"] = _fmt_mm(op.get("z_mm"))
             w.writerow(row)
+    print(f"written: {out_csv}")
     return 0
 
 
@@ -251,7 +257,9 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
         "SIDE#5{", "::DX=0 XY=1", "}SIDE",
         "SIDE#6{", "::DX=0 XY=1", "}SIDE",
     ]
-    return _write_utf16le_bom(out_path, lines)
+    rc = _write_utf16le_bom(out_path, lines)
+    print(f"written: {out_path}")
+    return rc
 
 
 # ------------------ TCN -> JSON (custom) ------------------
@@ -326,6 +334,7 @@ def cmd_from_tcn(tcn_path, board_json_path, out_ops_json):
     pathlib.Path(out_ops_json).parent.mkdir(parents=True, exist_ok=True)
     with open(out_ops_json, "w", encoding="utf-8") as f:
         json.dump(doc, f, ensure_ascii=False, indent=2)
+    print(f"written: {out_ops_json}")
     return 0
 
 
