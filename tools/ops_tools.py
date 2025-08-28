@@ -152,12 +152,8 @@ def _tpa_slot_W_blocks(op, tool_id: int):
     x2 = _fmt_mm(op["x2_mm"]); y2 = _fmt_mm(op["y2_mm"])
     z = _fmt_mm(op["z_mm"])
     return [
-        ("W#89{"  # set start, tool
-         f" ::WTs WS=1  #8015=0 #1={x1} #2={y1} #3=-{z} #201=1 #203=1 #205={tool_id} "
-         "#1001=100 #9502=0 #9503=0 #9505=0 #9506=0 #9504=0 #8101=0 #8096=0 #8095=0 "
-         "#37=0 #40=0 #39=0 #46=0 #8135=0 #8136=0 #38=0 #8180=0 #8181=0 #8185=0 #8186=0 }W"),
-        ("W#2201{"  # move end
-         f" ::WTl  #8015=0 #1={x2} #2={y2} #3=-{z} #42=0 #49=0 }}W")
+        f"W#89{{ ::WTs WS=1  #8015=0 #1={x1} #2={y1} #3=-{z} #201=1 #203=1 #205={tool_id} #1001=100 #9502=0 #9503=0 #9505=0 #9506=0 #9504=0 #8101=0 #8096=0 #8095=0 #37=0 #40=0 #39=0 #46=0 #8135=0 #8136=0 #38=0 #8180=0 #8181=0 #8185=0 #8186=0 }}W",
+        f"W#2201{{ ::WTl  #8015=0 #1={x2} #2={y2} #3=-{z} #42=0 #49=0 }}W",
     ]
 
 
@@ -166,6 +162,21 @@ def _tpa_saw_W1050(op, tool_id: int, start_x_mm: float = 50.0, start_y_mm: float
     z = _fmt_mm(op["z_mm"])
     off = float(op["offset_mm"])  # const pe axa perpendiculară
     L = float(op["length_mm"])    # lungime de tăiere
+
+    if axis == "X":
+        x0 = _fmt_mm(start_x_mm)
+        x1 = _fmt_mm(start_x_mm + L)
+        y = _fmt_mm(off)
+        return [
+            f"W#1050{{ ::WT2 WS=1  #8098=..\custom\mcr\lame.tmcr #6=1 #8020={x0} #8021={y} #8022=-{z} #9505=0 #8503=0 #8509=0 #8514=1 #8515=1 #8516={int(tool_id)} #8517={x1} #8525=0 #8526=0 #8527=0 }}W",
+        ]
+    else:  # axa Y
+        y0 = _fmt_mm(start_y_mm)
+        y1 = _fmt_mm(start_y_mm + L)
+        x = _fmt_mm(off)
+        return [
+            f"W#1050{{ ::WT2 WS=1  #8098=..\custom\mcr\lame.tmcr #6=2 #8020={x} #8021={y0} #8022=-{z} #9505=0 #8503=0 #8509=0 #8514=1 #8515=1 #8516={int(tool_id)} #8517={y1} #8525=0 #8526=0 #8527=0 }}W",
+        ]
 
     if axis == "X":
         x0 = _fmt_mm(start_x_mm)
@@ -212,7 +223,7 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
     saw_y0 = float(defaults.get("saw_start_y_mm", 50))
 
     lines = [
-        r"TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1",
+        r"TPA\ALBATROS\EDICAD\" + "02.00:1565:r0w0h0s1",
         "::SIDE=0;1;3;4;5;6;",
         "::ATTR=hide;varv",
         f"::UNm DL={DL} DH={DH} DS={DS}",
@@ -227,36 +238,44 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
         "OPTI{", ":: OPTKIND=%;0 OPTROUTER=%;0 LSTCOD=%0%1%2", "}OPTI",
         "LINK{", "}LINK",
         "SIDE#0{", "}SIDE",
-        "SIDE#1{",
-        "$=Up",
     ]
 
+    # Colectează W# pe fețe
+    by_face = {1: [], 3: [], 4: [], 5: [], 6: []}
     for op in ops:
+        face = int(op.get("face", 1))
         kind = op.get("op")
         if kind == "DRILL":
             x = _fmt_mm(op["x_mm"]); y = _fmt_mm(op["y_mm"]); z = _fmt_mm(op["z_mm"])
             d = _fmt_mm(op["dia_mm"])
             tool_id = int(drill_map.get(str(int(round(float(op["dia_mm"])))), drill_default))
-            lines.append(
-                ("W#81{"  # hole
-                 f" ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205={tool_id} #1001=0 #9505=0 }}W")
+            by_face.setdefault(face, []).append(
+                f"W#81{{ ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205={tool_id} #1001=0 #9505=0 }}W"
             )
         elif kind == "SLOT":
             width = int(round(float(op["width_mm"])))
             tool_id = int(tool_map_mill.get(str(width), mill_default))
-            lines += _tpa_slot_W_blocks(op, tool_id)
+            by_face.setdefault(face, []).extend(_tpa_slot_W_blocks(op, tool_id))
         elif kind == "SAW":
-            lines += _tpa_saw_W1050(op, saw_tool_id, start_x_mm=saw_x0, start_y_mm=saw_y0)
+            by_face.setdefault(face, []).extend(_tpa_saw_W1050(op, saw_tool_id, start_x_mm=saw_x0, start_y_mm=saw_y0))
         else:
             continue
 
-    lines += [
-        "}SIDE",
-        "SIDE#3{", "::DX=0 XY=1", "}SIDE",
-        "SIDE#4{", "::DX=0 XY=1", "}SIDE",
-        "SIDE#5{", "::DX=0 XY=1", "}SIDE",
-        "SIDE#6{", "::DX=0 XY=1", "}SIDE",
-    ]
+    # Emite pe fețe doar dacă există payload
+    def emit_face(face:int, payload:list):
+        if not payload:
+            return
+        hdr = "SIDE#" + str(face) + "{"
+        if face == 1:
+            lines.extend([hdr, "$=Up"])
+        else:
+            lines.extend([hdr, "::DX=0 XY=1"])
+        lines.extend(payload)
+        lines.append("}SIDE")
+
+    for f in (1,3,4,5,6):
+        emit_face(f, by_face.get(f, []))
+
     rc = _write_utf16le_bom(out_path, lines)
     print(f"written: {out_path}")
     return rc
