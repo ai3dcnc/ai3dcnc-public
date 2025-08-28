@@ -1,0 +1,46 @@
+*** Begin Patch
+*** Add File: samples/ops_probe_drills_faces.json
++{
+
+"version": "0.1-lite",
+
+"units": "mm",
+
+"board": { "DL_mm": 800, "DH_mm": 450, "DS_mm": 18 },
+
+"ops": [
+
+{ "id": "f3_d5", "op": "DRILL", "face": 3, "x_mm": 100, "y_mm": 50, "z_mm": 10, "dia_mm": 5 },
+
+{ "id": "f3_d6", "op": "DRILL", "face": 3, "x_mm": 200, "y_mm": 50, "z_mm": 10, "dia_mm": 6 },
+
+{ "id": "f3_d8", "op": "DRILL", "face": 3, "x_mm": 300, "y_mm": 50, "z_mm": 10, "dia_mm": 8 },
+
+{ "id": "f3_d10", "op": "DRILL", "face": 3, "x_mm": 400, "y_mm": 50, "z_mm": 10, "dia_mm": 10 },
+
+{ "id": "f4_d5", "op": "DRILL", "face": 4, "x_mm": 100, "y_mm": 60, "z_mm": 10, "dia_mm": 5 },
+
+{ "id": "f4_d6", "op": "DRILL", "face": 4, "x_mm": 200, "y_mm": 60, "z_mm": 10, "dia_mm": 6 },
+
+{ "id": "f4_d8", "op": "DRILL", "face": 4, "x_mm": 300, "y_mm": 60, "z_mm": 10, "dia_mm": 8 },
+
+{ "id": "f4_d10","op": "DRILL", "face": 4, "x_mm": 400, "y_mm": 60, "z_mm": 10, "dia_mm": 10 },
+
+{ "id": "f5_d5", "op": "DRILL", "face": 5, "x_mm": 100, "y_mm": 70, "z_mm": 10, "dia_mm": 5 },
+
+{ "id": "f5_d6", "op": "DRILL", "face": 5, "x_mm": 200, "y_mm": 70, "z_mm": 10, "dia_mm": 6 },
+
+{ "id": "f5_d8", "op": "DRILL", "face": 5, "x_mm": 300, "y_mm": 70, "z_mm": 10, "dia_mm": 8 },
+
+{ "id": "f5_d10","op": "DRILL", "face": 5, "x_mm": 400, "y_mm": 70, "z_mm": 10, "dia_mm": 10 },
+
+{ "id": "f6_d5", "op": "DRILL", "face": 6, "x_mm": 100, "y_mm": 80, "z_mm": 10, "dia_mm": 5 },
+
+{ "id": "f6_d6", "op": "DRILL", "face": 6, "x_mm": 200, "y_mm": 80, "z_mm": 10, "dia_mm": 6 },
+
+{ "id": "f6_d8", "op": "DRILL", "face": 6, "x_mm": 300, "y_mm": 80, "z_mm": 10, "dia_mm": 8 },
+
+{ "id": "f6_d10","op": "DRILL", "face": 6, "x_mm": 400, "y_mm": 80, "z_mm": 10, "dia_mm": 10 }
+
+]
++}
