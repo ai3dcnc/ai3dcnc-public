@@ -1,5 +1,14 @@
-{ "version":"0.1-lite","units":"mm","from_finished_edges":true,
-  "board":{"DL_mm":800,"DH_mm":450,"DS_mm":18},
-  "ops":[{"id":"s16","op":"SLOT","face":1,
-          "x1_mm":200,"y1_mm":80,"x2_mm":300,"y2_mm":80,
-          "width_mm":16,"z_mm":10}]}
+{
+  "version": "0.1-lite",
+  "units": "mm",
+  "board": {
+    "DL_mm": 800, "DH_mm": 450, "DS_mm": 18,
+    "material": "PB",
+    "edge_bands": { "F": false, "B": false, "L": false, "R": false }
+  },
+  "ops": [
+    { "id": "slot16", "op": "SLOT", "face": 1,
+      "x1_mm": 200, "y1_mm": 80, "x2_mm": 300, "y2_mm": 80,
+      "width_mm": 16, "z_mm": 10 }
+  ]
+}
