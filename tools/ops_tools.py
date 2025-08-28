@@ -168,14 +168,14 @@ def _tpa_saw_W1050(op, tool_id: int, start_x_mm: float = 50.0, start_y_mm: float
         x1 = _fmt_mm(start_x_mm + L)
         y = _fmt_mm(off)
         return [
-            f"W#1050{{ ::WT2 WS=1  #8098=..\custom\mcr\lame.tmcr #6=1 #8020={x0} #8021={y} #8022=-{z} #9505=0 #8503=0 #8509=0 #8514=1 #8515=1 #8516={int(tool_id)} #8517={x1} #8525=0 #8526=0 #8527=0 }}W",
+            rf"W#1050{{ ::WT2 WS=1  #8098=..\custom\mcr\lame.tmcr #6=1 #8020={x0} #8021={y} #8022=-{z} #9505=0 #8503=0 #8509=0 #8514=1 #8515=1 #8516={int(tool_id)} #8517={x1} #8525=0 #8526=0 #8527=0 }}W",
         ]
     else:  # axa Y
         y0 = _fmt_mm(start_y_mm)
         y1 = _fmt_mm(start_y_mm + L)
         x = _fmt_mm(off)
         return [
-            f"W#1050{{ ::WT2 WS=1  #8098=..\custom\mcr\lame.tmcr #6=2 #8020={x} #8021={y0} #8022=-{z} #9505=0 #8503=0 #8509=0 #8514=1 #8515=1 #8516={int(tool_id)} #8517={y1} #8525=0 #8526=0 #8527=0 }}W",
+            rf"W#1050{{ ::WT2 WS=1  #8098=..\custom\mcr\lame.tmcr #6=2 #8020={x} #8021={y0} #8022=-{z} #9505=0 #8503=0 #8509=0 #8514=1 #8515=1 #8516={int(tool_id)} #8517={y1} #8525=0 #8526=0 #8527=0 }}W",
         ]
 
     if axis == "X":
@@ -216,6 +216,10 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
     mill_default = int(tool_cfg.get("default_mill_id", 1004))
     drill_map = {str(k): int(v) for k, v in tool_cfg.get("drill_by_diam_mm", {}).items()} if "drill_by_diam_mm" in tool_cfg else {}
     drill_default = int(tool_cfg.get("default_drill_id", 1))
+    # Fallback scule per față dacă profilul nu definește explicit
+    face_drill_defaults = {int(k): int(v) for k, v in (tool_cfg.get("drill_face_default", {}) or {}).items()}
+    if not face_drill_defaults:
+        face_drill_defaults = {3: 41, 4: 51, 5: 42, 6: 52}
     saw_tool_id = int(tool_cfg.get("saw_default_id", 2001))
 
     defaults = prof.get("tpa", {}).get("defaults", {})
@@ -223,7 +227,7 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
     saw_y0 = float(defaults.get("saw_start_y_mm", 50))
 
     lines = [
-        "TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1",
+        r"TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1",
         "::SIDE=0;1;3;4;5;6;",
         "::ATTR=hide;varv",
         f"::UNm DL={DL} DH={DH} DS={DS}",
@@ -248,7 +252,8 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
         if kind == "DRILL":
             x = _fmt_mm(op["x_mm"]); y = _fmt_mm(op["y_mm"]); z = _fmt_mm(op["z_mm"])
             d = _fmt_mm(op["dia_mm"])
-            tool_id = int(drill_map.get(str(int(round(float(op["dia_mm"])))), drill_default))
+            diam_key = str(int(round(float(op["dia_mm"]))));
+            tool_id = int(drill_map.get(diam_key, face_drill_defaults.get(face, drill_default)))
             by_face.setdefault(face, []).append(
                 f"W#81{{ ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205={tool_id} #1001=0 #9505=0 }}W"
             )
@@ -263,7 +268,7 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
 
     # Emite pe fețe doar dacă există payload
     def emit_face(face:int, payload:list):
-        if not payload:
+        if not payload and face != 1:
             return
         hdr = "SIDE#" + str(face) + "{"
         if face == 1:
