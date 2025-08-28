@@ -213,7 +213,7 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
 
     lines = [
         r"TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1",
-        "::SIDE=0;1;",
+        "::SIDE=0;1;3;4;5;6;",
         "::ATTR=hide;varv",
         f"::UNm DL={DL} DH={DH} DS={DS}",
         "'tcn version=2.8.21",
