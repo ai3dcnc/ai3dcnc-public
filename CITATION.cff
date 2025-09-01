@@ -4,3 +4,6 @@ authors:
     orcid: https://orcid.org/0009-0004-2216-218X
 version: 0.1.0
 doi: 10.5281/zenodo.XXXXXXX  # completezi după publicare
+doi: 10.5281/zenodo.17025381
+date-released: 2025-09-01
+url: https://github.com/ai3dcnc/ai3dcnc-public
