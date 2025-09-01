@@ -1,5 +1,5 @@
-id,op,face,x_mm,y_mm,z_mm,dia_mm,width_mm
-d1,DRILL,1,100,80,15,5,
-s1,SLOT,1,,,10,,6
-p1,PROFILE,1,,,5,,
-w1,SAW,1,,,9,,
+id,op,face,x_mm,y_mm,z_mm,dia_mm,x1_mm,y1_mm,x2_mm,y2_mm,width_mm,axis,offset_mm,length_mm
+d1,DRILL,1,100,80,15,5,,,,,,,,
+s1,SLOT,1,,,10,,200,80,300,80,6,,,
+p1,PROFILE,1,,,,,,,,,,,,
+w1,SAW,1,,,9,,,,,,,X,250,400
