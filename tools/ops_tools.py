@@ -9,7 +9,6 @@ CSV_HEADER = [
     "axis","offset_mm","length_mm"
 ]
 
-
 def _read_json(p: str):
     """Read JSON accepting UTF-8 with or without BOM. Better error on missing file."""
     try:
@@ -39,29 +38,31 @@ def cmd_validate(ops_path, schema_path):
 
 # ------------------ Custom TCN (simple) ------------------
 
+# tolerant to missing keys so samples like ops_min.json never fail
+
 def _line_drill(op):
     return " ".join([
         "DRILL",
-        f"id={op['id']}",
-        f"FACE={op['face']}",
-        f"X={_fmt_mm(op['x_mm'])}",
-        f"Y={_fmt_mm(op['y_mm'])}",
-        f"Z={_fmt_mm(op['z_mm'])}",
-        f"W={_fmt_mm(op['dia_mm'])}",
+        f"id={op.get('id','')}",
+        f"FACE={op.get('face',1)}",
+        f"X={_fmt_mm(op.get('x_mm', 0))}",
+        f"Y={_fmt_mm(op.get('y_mm', 0))}",
+        f"Z={_fmt_mm(op.get('z_mm', 0))}",
+        f"W={_fmt_mm(op.get('dia_mm', 0))}",
     ])
 
 
 def _line_slot(op):
     return " ".join([
         "SLOT",
-        f"id={op['id']}",
-        f"FACE={op['face']}",
-        f"X1={_fmt_mm(op['x1_mm'])}",
-        f"Y1={_fmt_mm(op['y1_mm'])}",
-        f"X2={_fmt_mm(op['x2_mm'])}",
-        f"Y2={_fmt_mm(op['y2_mm'])}",
-        f"W={_fmt_mm(op['width_mm'])}",
-        f"Z={_fmt_mm(op['z_mm'])}",
+        f"id={op.get('id','')}",
+        f"FACE={op.get('face',1)}",
+        f"X1={_fmt_mm(op.get('x1_mm', 0))}",
+        f"Y1={_fmt_mm(op.get('y1_mm', 0))}",
+        f"X2={_fmt_mm(op.get('x2_mm', 0))}",
+        f"Y2={_fmt_mm(op.get('y2_mm', 0))}",
+        f"W={_fmt_mm(op.get('width_mm', 0))}",
+        f"Z={_fmt_mm(op.get('z_mm', 0))}",
         "ANGLE=0",
     ])
 
@@ -69,24 +70,22 @@ def _line_slot(op):
 def _line_saw(op):
     return " ".join([
         "SAW",
-        f"id={op['id']}",
-        f"FACE={op['face']}",
-        f"AXIS={op['axis']}",
-        f"OFFSET={_fmt_mm(op['offset_mm'])}",
-        f"LENGTH={_fmt_mm(op['length_mm'])}",
-        f"Z={_fmt_mm(op['z_mm'])}",
+        f"id={op.get('id','')}",
+        f"FACE={op.get('face',1)}",
+        f"AXIS={str(op.get('axis','X')).upper()}",
+        f"OFFSET={_fmt_mm(op.get('offset_mm', 0))}",
+        f"LENGTH={_fmt_mm(op.get('length_mm', 0))}",
+        f"Z={_fmt_mm(op.get('z_mm', 0))}",
     ])
 
 
 def cmd_to_tcn(ops_path, profile_path, out_path):
-    ops = _read_json(ops_path)["ops"]
-    profile = _read_json(profile_path)
+    ops = _read_json(ops_path).get("ops", [])
+    # profile is currently unused for simple TCN; kept for CLI compatibility
+    _ = profile_path
     lines = list(TCN_HEADER)
-    hc = profile.get("tcn", {}).get("header_comment")
-    if hc:
-        lines.insert(0, f"; {hc}")
     for op in ops:
-        t = op.get("op")
+        t = (op.get("op") or "").upper()
         if t == "DRILL":
             lines.append(_line_drill(op))
         elif t == "SLOT":
@@ -104,7 +103,7 @@ def cmd_to_tcn(ops_path, profile_path, out_path):
 # ------------------ CSV ------------------
 
 def cmd_to_csv(ops_path, out_csv):
-    ops = _read_json(ops_path)["ops"]
+    ops = _read_json(ops_path).get("ops", [])
     pathlib.Path(out_csv).parent.mkdir(parents=True, exist_ok=True)
     with open(out_csv, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=CSV_HEADER)
@@ -114,19 +113,20 @@ def cmd_to_csv(ops_path, out_csv):
             row["id"] = op.get("id", "")
             row["op"] = op.get("op", "")
             row["face"] = op.get("face", "")
-            if op["op"] == "DRILL":
+            kind = (op.get("op") or "").upper()
+            if kind == "DRILL":
                 row["x_mm"] = _fmt_mm(op.get("x_mm"))
                 row["y_mm"] = _fmt_mm(op.get("y_mm"))
                 row["z_mm"] = _fmt_mm(op.get("z_mm"))
                 row["dia_mm"] = _fmt_mm(op.get("dia_mm"))
-            elif op["op"] == "SLOT":
+            elif kind == "SLOT":
                 row["x1_mm"] = _fmt_mm(op.get("x1_mm"))
                 row["y1_mm"] = _fmt_mm(op.get("y1_mm"))
                 row["x2_mm"] = _fmt_mm(op.get("x2_mm"))
                 row["y2_mm"] = _fmt_mm(op.get("y2_mm"))
                 row["width_mm"] = _fmt_mm(op.get("width_mm"))
                 row["z_mm"] = _fmt_mm(op.get("z_mm"))
-            elif op["op"] == "SAW":
+            elif kind == "SAW":
                 row["axis"] = op.get("axis", "")
                 row["offset_mm"] = _fmt_mm(op.get("offset_mm"))
                 row["length_mm"] = _fmt_mm(op.get("length_mm"))
@@ -148,9 +148,9 @@ def _write_utf16le_bom(out_path: str, lines):
 
 
 def _tpa_slot_W_blocks(op, tool_id: int):
-    x1 = _fmt_mm(op["x1_mm"]); y1 = _fmt_mm(op["y1_mm"]) 
-    x2 = _fmt_mm(op["x2_mm"]); y2 = _fmt_mm(op["y2_mm"]) 
-    z = _fmt_mm(op["z_mm"]) 
+    x1 = _fmt_mm(op.get("x1_mm", 0)); y1 = _fmt_mm(op.get("y1_mm", 0))
+    x2 = _fmt_mm(op.get("x2_mm", 0)); y2 = _fmt_mm(op.get("y2_mm", 0))
+    z = _fmt_mm(op.get("z_mm", 0))
     return [
         f"W#89{{ ::WTs WS=1  #8015=0 #1={x1} #2={y1} #3=-{z} #201=1 #203=1 #205={tool_id} #1001=100 #9502=0 #9503=0 #9505=0 #9506=0 #9504=0 #8101=0 #8096=0 #8095=0 #37=0 #40=0 #39=0 #46=0 #8135=0 #8136=0 #38=0 #8180=0 #8181=0 #8185=0 #8186=0 }}W",
         f"W#2201{{ ::WTl  #8015=0 #1={x2} #2={y2} #3=-{z} #42=0 #49=0 }}W",
@@ -159,9 +159,9 @@ def _tpa_slot_W_blocks(op, tool_id: int):
 
 def _tpa_saw_W1050(op, tool_id: int, start_x_mm: float = 50.0, start_y_mm: float = 50.0):
     axis = str(op.get("axis", "X")).upper()
-    z = _fmt_mm(op["z_mm"]) 
-    off = float(op["offset_mm"])  # const pe axa perpendiculară
-    L = float(op["length_mm"])    # lungime de tăiere
+    z = _fmt_mm(op.get("z_mm", 0))
+    off = float(op.get("offset_mm", 0))  # const pe axa perpendiculară
+    L = float(op.get("length_mm", 0))    # lungime de tăiere
 
     if axis == "X":
         x0 = _fmt_mm(start_x_mm)
@@ -182,7 +182,7 @@ def _tpa_saw_W1050(op, tool_id: int, start_x_mm: float = 50.0, start_y_mm: float
 def cmd_to_tpa(ops_path, profile_path, out_path):
     # Dialect Vitap TpaCAD (ALBATROS/EDICAD). Scriere UTF-16LE + BOM + CRLF.
     doc = _read_json(ops_path)
-    ops = doc["ops"]
+    ops = doc.get("ops", [])
     board = doc.get("board", {})
     DL = int(board.get("DL_mm", 800))
     DH = int(board.get("DH_mm", 450))
@@ -222,21 +222,21 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
         "SIDE#0{", "}SIDE",
     ]
 
-    # Colectează W# pe fețe
+    # Colectează W# pe fețe (inclusiv fața 1)
     by_face = {1: [], 3: [], 4: [], 5: [], 6: []}
     for op in ops:
         face = int(op.get("face", 1))
-        kind = op.get("op")
+        kind = (op.get("op") or "").upper()
         if kind == "DRILL":
-            x = _fmt_mm(op["x_mm"]); y = _fmt_mm(op["y_mm"]); z = _fmt_mm(op["z_mm"]) 
-            d = _fmt_mm(op["dia_mm"]) 
-            diam_key = str(int(round(float(op["dia_mm"]))));
+            x = _fmt_mm(op.get("x_mm", 0)); y = _fmt_mm(op.get("y_mm", 0)); z = _fmt_mm(op.get("z_mm", 0))
+            d = _fmt_mm(op.get("dia_mm", 0))
+            diam_key = str(int(round(float(op.get("dia_mm", 0) or 0))))
             tool_id = int(drill_map.get(diam_key, face_drill_defaults.get(face, drill_default)))
             by_face.setdefault(face, []).append(
                 f"W#81{{ ::WTp WS=1  #8015=0 #1={x} #2={y} #3=-{z} #1002={d} #201=1 #203=1 #205={tool_id} #1001=0 #9505=0 }}W"
             )
         elif kind == "SLOT":
-            width = int(round(float(op["width_mm"])))
+            width = int(round(float(op.get("width_mm", 0) or 0)))
             tool_id = int(tool_map_mill.get(str(width), mill_default))
             by_face.setdefault(face, []).extend(_tpa_slot_W_blocks(op, tool_id))
         elif kind == "SAW":
@@ -244,7 +244,7 @@ def cmd_to_tpa(ops_path, profile_path, out_path):
         else:
             continue
 
-    # Emite pe fețe doar dacă există payload
+    # Emite pe fețe; pe fața 1 punem $=Up
     def emit_face(face:int, payload:list):
         if not payload and face != 1:
             return
