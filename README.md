@@ -52,7 +52,22 @@ Artefacte locale: `exports/ops_min.tcn`, `exports/ops_min.csv`.
 > Pentru TpaCAD: header `TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1`, `::SIDE=0;1;3;4;5;6;`, CRLF, **UTF‑16LE + BOM**.
 
 ---
+## Corpus (verified samples)
 
+Mostre TPA/TCN folosite la teste pe Vitap K2 (TPA-CAD) și în parserul nostru minimal.
+
+### TPA-CAD (.tcn – ALBATROS/EDICAD)
+- `corpus/tpa/drills_face1_mm_d5-25_grid.tcn` — grid de găuri pe **face 1** (probe de diametre, TPA).
+- `corpus/tpa/slot_face1_w16_d10_T1004.tcn` — **slot** pe face 1, W=16 mm, Z=10 mm, **tool 1004** (TPA).
+
+### TCN minimal (custom dialect)
+- `corpus/tcn/drill_grid_3x2.tcn` — grid 3×2 de găuri pentru teste rapide.
+- `corpus/tcn/slot_line_face1.tcn` — slot liniar pe face 1.
+
+> Note:
+> - Fișierele TPA sunt UTF-16LE + BOM, CRLF; deschidere directă în TPA-CAD.
+> - Fișierele TCN (custom) sunt text UTF-8; pot fi parse-uite cu `tools/ops_tools.py from-tcn`.
+---
 ## CI
 
 * Workflow **E2E** (Windows) – rulează `tools/test_e2e.ps1` și urcă artefactele din `exports/`.
