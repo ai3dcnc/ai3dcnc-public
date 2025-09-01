@@ -1,4 +1,4 @@
-# AI3DCNC – Public Knowledge Repo
+# README.md
 
 [![E2E](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml/badge.svg)](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml)
 [![Release](https://img.shields.io/github/v/release/ai3dcnc/ai3dcnc-public?sort=semver)](https://github.com/ai3dcnc/ai3dcnc-public/releases)
@@ -28,20 +28,12 @@ Artefacte locale: `exports/ops_min.tcn`, `exports/ops_min.csv`.
 
 ---
 
-## Goals
-
-* Open‑core knowledge base pentru automatizări CNC în **Blender 4.2 LTS**
-* **Defensive publication** + versiuni citable (DOI)
-* Resurse de învățare cu pași verificabili (scripts + samples)
-
----
-
 ## Structure
 
 * `parsers/` – exportori Blender (mesh, scene, materials)
 * `builders/` – reimport / reconstrucție
 * `docs/` – standarde, roadmap, note
-* `samples/` – exemple JSON (operații DRILL/SLOT/SAW etc.)
+* `samples/` – exemple JSON (DRILL/SLOT/SAW etc.)
 * `schemas/` – JSON Schemas pentru validare
 * `profiles/` – profile mașini (ex. **Vitap\_K2.profile.json**)
 * `tools/` – utilitare CLI (TCN/CSV/TPA, E2E)
@@ -49,7 +41,7 @@ Artefacte locale: `exports/ops_min.tcn`, `exports/ops_min.csv`.
 
 ---
 
-## CLI – ops\_tools.py (rezumat)
+## CLI – tools/ops\_tools.py
 
 * `validate <ops.json> <schema.json>` – validează un document de operații
 * `to-tcn <ops.json> <profile.json> <out.tcn>` – generează TCN simplu (DRILL/SLOT/SAW)
@@ -63,9 +55,7 @@ Artefacte locale: `exports/ops_min.tcn`, `exports/ops_min.csv`.
 
 ## CI
 
-* Workflow **E2E** (Windows)
-* Rulează `tools/test_e2e.ps1` și urcă artefactele din `exports/`
-* Statusul curent este în badge‑ul **E2E** de sus
+* Workflow **E2E** (Windows) – rulează `tools/test_e2e.ps1` și urcă artefactele din `exports/`.
 
 ---
 
@@ -74,7 +64,7 @@ Artefacte locale: `exports/ops_min.tcn`, `exports/ops_min.csv`.
 * **DOI (versiunea curentă):** `10.5281/zenodo.17025381`
 * **DOI (concept – recomandat pentru citare pe termen lung):** `<CONCEPT_DOI>`
 
-Exemplu BibTeX:
+BibTeX:
 
 ```bibtex
 @software{ai3dcnc_public,
@@ -86,16 +76,10 @@ Exemplu BibTeX:
 }
 ```
 
-> Înlocuiește `<CONCEPT_DOI>` după ce Zenodo îți afișează **Concept DOI** (pagina recordului principal).
-
----
-
 ## License
 
-**Apache‑2.0** – liber de folosit și modificat cu atribuție.
+Apache-2.0 – liber de folosit și modificat cu atribuție.
 
 ---
 
-## Acknowledgments
 
-Dezvoltat de **Balaur Ionuț Doru / AI3DCNC**, cu asistență **ChatGPT (OpenAI)**.
