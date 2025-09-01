@@ -1,115 +1,100 @@
 # AI3DCNC – Public Knowledge Repo
 
-<!-- DOI pentru versiunea curentă -->
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17025381.svg)](https://doi.org/10.5281/zenodo.17025381)
-
-<!-- DOI “concept” – recomandat pentru citare pe termen lung -->
-[![DOI](https://zenodo.org/badge/DOI/<CONCEPT_DOI>.svg)](https://doi.org/<CONCEPT_DOI>)
-
-
 [![E2E](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml/badge.svg)](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml)
 [![Release](https://img.shields.io/github/v/release/ai3dcnc/ai3dcnc-public?sort=semver)](https://github.com/ai3dcnc/ai3dcnc-public/releases)
+[![DOI (this version)](https://zenodo.org/badge/DOI/10.5281/zenodo.17025381.svg)](https://doi.org/10.5281/zenodo.17025381)
+[![DOI (concept)](https://zenodo.org/badge/DOI/<CONCEPT_DOI>.svg)](https://doi.org/<CONCEPT_DOI>)
 
-Repo cu **parsers, builders și documentație** pentru AI3DCNC.
+Repo cu **parsers, builders și documentație** pentru AI3DCNC (automatizări CNC, Vitap K2 / TpaCAD, export TCN/CSV).
 
-> **Units:** authoring în metri, export **mm**.
+> **Units:** authoring în **metri**, export în **mm**.
+
+---
 
 ## Quickstart
 
 ```powershell
+# Validare JSON vs. schemă
 python tools/ops_tools.py validate samples/ops_min.json schemas/ops_json.schema.json
+
+# Export TCN minim
 python tools/ops_tools.py to-tcn samples/ops_min.json profiles/Vitap_K2.profile.json exports/ops_min.tcn
+
+# Export CSV canonic
 python tools/ops_tools.py to-csv samples/ops_min.json exports/ops_min.csv
 ```
 
 Artefacte locale: `exports/ops_min.tcn`, `exports/ops_min.csv`.
 
+---
+
 ## Goals
 
-* Open-core knowledge base pentru automatizări CNC în Blender 4.2 LTS
-* Defensive publication
-* Resurse de învățare cu pași verificabili
+* Open‑core knowledge base pentru automatizări CNC în **Blender 4.2 LTS**
+* **Defensive publication** + versiuni citable (DOI)
+* Resurse de învățare cu pași verificabili (scripts + samples)
+
+---
 
 ## Structure
 
 * `parsers/` – exportori Blender (mesh, scene, materials)
 * `builders/` – reimport / reconstrucție
 * `docs/` – standarde, roadmap, note
-* `samples/` – exemple JSON
+* `samples/` – exemple JSON (operații DRILL/SLOT/SAW etc.)
 * `schemas/` – JSON Schemas pentru validare
-* `profiles/` – profile mașini
-* `tools/` – utilitare CLI (TCN/CSV, E2E, mem)
+* `profiles/` – profile mașini (ex. **Vitap\_K2.profile.json**)
+* `tools/` – utilitare CLI (TCN/CSV/TPA, E2E)
 * `corpus/` – mostre TCN/DXF pentru testare
+
+---
+
+## CLI – ops\_tools.py (rezumat)
+
+* `validate <ops.json> <schema.json>` – validează un document de operații
+* `to-tcn <ops.json> <profile.json> <out.tcn>` – generează TCN simplu (DRILL/SLOT/SAW)
+* `to-tpa <ops.json> <profile.json> <out.tcn>` – generează dialect **Vitap TpaCAD** (UTF‑16LE + BOM)
+* `to-csv <ops.json> <out.csv>` – export canonic CSV
+* `from-tcn <in.tcn> <board.json> <out.ops.json>` – parse TCN → JSON canonic
+
+> Pentru TpaCAD: header `TPA\ALBATROS\EDICAD\02.00:1565:r0w0h0s1`, `::SIDE=0;1;3;4;5;6;`, CRLF, **UTF‑16LE + BOM**.
+
+---
 
 ## CI
 
-* Workflow: **E2E** pe Windows. Rulează `tools/test_e2e.ps1` și urcă artefactele `exports`.
-* Status: vezi badge-ul de mai sus și fila **Actions**.
+* Workflow **E2E** (Windows)
+* Rulează `tools/test_e2e.ps1` și urcă artefactele din `exports/`
+* Statusul curent este în badge‑ul **E2E** de sus
 
-## Docs
+---
 
-* [Defensive Publication](docs/defensive-publication.md)
-* [Memory Sets proposal](docs/MEMORY_SETS.md)
-* [BACKGROUND.md](./BACKGROUND.md)
+## Cite
 
-## License
+* **DOI (versiunea curentă):** `10.5281/zenodo.17025381`
+* **DOI (concept – recomandat pentru citare pe termen lung):** `<CONCEPT_DOI>`
 
-Apache-2.0 – liber de folosit și modificat cu atribuție.
+Exemplu BibTeX:
 
-## Acknowledgments
-
-Dezvoltat de **Balaur Ionuț Doru / AI3DCNC**, cu asistență **ChatGPT (OpenAI)**.
-
-# AI3DCNC – Public Knowledge Repo
-
-[![E2E](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml/badge.svg)](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml)
-[![Release](https://img.shields.io/github/v/release/ai3dcnc/ai3dcnc-public?sort=semver)](https://github.com/ai3dcnc/ai3dcnc-public/releases)
-
-Repo cu **parsers, builders și documentație** pentru AI3DCNC.
-
-> **Units:** authoring în metri, export **mm**.
-
-## Quickstart
-
-```powershell
-python tools/ops_tools.py validate samples/ops_min.json schemas/ops_json.schema.json
-python tools/ops_tools.py to-tcn samples/ops_min.json profiles/Vitap_K2.profile.json exports/ops_min.tcn
-python tools/ops_tools.py to-csv samples/ops_min.json exports/ops_min.csv
+```bibtex
+@software{ai3dcnc_public,
+  author  = {Balaur, Ionuț Doru},
+  title   = {AI3DCNC – Public Knowledge Repo},
+  year    = {2025},
+  version = {v0.1.0},
+  doi     = {10.5281/zenodo.17025381}
+}
 ```
 
-Artefacte locale: `exports/ops_min.tcn`, `exports/ops_min.csv`.
+> Înlocuiește `<CONCEPT_DOI>` după ce Zenodo îți afișează **Concept DOI** (pagina recordului principal).
 
-## Goals
-
-* Open-core knowledge base pentru automatizări CNC în Blender 4.2 LTS
-* Defensive publication
-* Resurse de învățare cu pași verificabili
-
-## Structure
-
-* `parsers/` – exportori Blender (mesh, scene, materials)
-* `builders/` – reimport / reconstrucție
-* `docs/` – standarde, roadmap, note
-* `samples/` – exemple JSON
-* `schemas/` – JSON Schemas pentru validare
-* `profiles/` – profile mașini
-* `tools/` – utilitare CLI (TCN/CSV, E2E, mem)
-* `corpus/` – mostre TCN/DXF pentru testare
-
-## CI
-
-* Workflow: **E2E** pe Windows. Rulează `tools/test_e2e.ps1` și urcă artefactele `exports`.
-* Status: vezi badge-ul de mai sus și fila **Actions**.
-
-## Docs
-
-* [Defensive Publication](docs/defensive-publication.md)
-* [Memory Sets proposal](docs/MEMORY_SETS.md)
-* [BACKGROUND.md](./BACKGROUND.md)
+---
 
 ## License
 
-Apache-2.0 – liber de folosit și modificat cu atribuție.
+**Apache‑2.0** – liber de folosit și modificat cu atribuție.
+
+---
 
 ## Acknowledgments
 
