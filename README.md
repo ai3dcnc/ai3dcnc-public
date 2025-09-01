@@ -1,5 +1,12 @@
 # AI3DCNC – Public Knowledge Repo
 
+<!-- DOI pentru versiunea curentă -->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17025381.svg)](https://doi.org/10.5281/zenodo.17025381)
+
+<!-- DOI “concept” – recomandat pentru citare pe termen lung -->
+[![DOI](https://zenodo.org/badge/DOI/<CONCEPT_DOI>.svg)](https://doi.org/<CONCEPT_DOI>)
+
+
 [![E2E](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml/badge.svg)](https://github.com/ai3dcnc/ai3dcnc-public/actions/workflows/e2e.yml)
 [![Release](https://img.shields.io/github/v/release/ai3dcnc/ai3dcnc-public?sort=semver)](https://github.com/ai3dcnc/ai3dcnc-public/releases)
 
