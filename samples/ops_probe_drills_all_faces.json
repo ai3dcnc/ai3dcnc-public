@@ -1,0 +1,37 @@
+{
+  "version": "0.1-lite",
+  "units": "mm",
+  "board": {
+    "DL_mm": 800,
+    "DH_mm": 450,
+    "DS_mm": 18,
+    "material": "PB",
+    "edge_bands": { "F": false, "B": false, "L": false, "R": false }
+  },
+  "ops": [
+    { "id": "f1_d5",  "op": "DRILL", "face": 1, "x_mm": 100, "y_mm": 100, "z_mm": 10, "dia_mm": 5  },
+    { "id": "f1_d6",  "op": "DRILL", "face": 1, "x_mm": 200, "y_mm": 100, "z_mm": 10, "dia_mm": 6  },
+    { "id": "f1_d8",  "op": "DRILL", "face": 1, "x_mm": 300, "y_mm": 100, "z_mm": 10, "dia_mm": 8  },
+    { "id": "f1_d10", "op": "DRILL", "face": 1, "x_mm": 400, "y_mm": 100, "z_mm": 10, "dia_mm": 10 },
+
+    { "id": "f3_a",  "op": "DRILL", "face": 3, "x_mm": 100, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f3_b",  "op": "DRILL", "face": 3, "x_mm": 200, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f3_c",  "op": "DRILL", "face": 3, "x_mm": 300, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f3_d",  "op": "DRILL", "face": 3, "x_mm": 400, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+
+    { "id": "f4_a",  "op": "DRILL", "face": 4, "x_mm": 100, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f4_b",  "op": "DRILL", "face": 4, "x_mm": 200, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f4_c",  "op": "DRILL", "face": 4, "x_mm": 300, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f4_d",  "op": "DRILL", "face": 4, "x_mm": 400, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+
+    { "id": "f5_a",  "op": "DRILL", "face": 5, "x_mm": 100, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f5_b",  "op": "DRILL", "face": 5, "x_mm": 200, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f5_c",  "op": "DRILL", "face": 5, "x_mm": 300, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f5_d",  "op": "DRILL", "face": 5, "x_mm": 400, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+
+    { "id": "f6_a",  "op": "DRILL", "face": 6, "x_mm": 100, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f6_b",  "op": "DRILL", "face": 6, "x_mm": 200, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f6_c",  "op": "DRILL", "face": 6, "x_mm": 300, "y_mm": 9, "z_mm": 10, "dia_mm": 8 },
+    { "id": "f6_d",  "op": "DRILL", "face": 6, "x_mm": 400, "y_mm": 9, "z_mm": 10, "dia_mm": 8 }
+  ]
+}
